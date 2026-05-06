@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Sama Flotte 2.0</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -11,129 +12,85 @@
 --bg:#071122;--bg2:#0a1a35;--bg3:#0d2040;--sidebar:#0a1a35;
 --accent:#a78bfa;--accent2:#7c3aed;--accent3:#6d28d9;
 --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
---border:#1e3a5f;--border2:#2d4a6f;
---card:#0d2040;--card2:#0f2547;
+--border:#1e3a5f;--border2:#2d4a6f;--card:#0d2040;
 --green:#10b981;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;--orange:#f97316;
 --radius:12px;--radius-sm:8px;--radius-lg:16px;
 --shadow:0 4px 24px rgba(0,0,0,0.4);
 --font:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace;
 }
-.light{
---bg:#f0f2f8;--bg2:#e8ecf4;--bg3:#dde3ef;--sidebar:#fff;
---accent:#534AB7;--accent2:#534AB7;--accent3:#3d369e;
---text:#1e293b;--text2:#475569;--text3:#94a3b8;
---border:#d1d9e6;--border2:#b8c4d8;--card:#fff;--card2:#f8faff;
---shadow:0 4px 24px rgba(83,74,183,.08);
-}
+.light{--bg:#f0f2f8;--bg2:#e8ecf4;--bg3:#dde3ef;--sidebar:#fff;--accent:#534AB7;--accent2:#534AB7;--accent3:#3d369e;--text:#1e293b;--text2:#475569;--text3:#94a3b8;--border:#d1d9e6;--border2:#b8c4d8;--card:#fff;--shadow:0 4px 24px rgba(83,74,183,.08);}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:var(--bg2)}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 input,select,textarea{font-family:var(--font);background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 13px;border-radius:var(--radius-sm);font-size:13px;width:100%;outline:none;transition:border .2s}
 input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(167,139,250,.12)}
 .light input,.light select,.light textarea{background:#f8faff}
 button{font-family:var(--font);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s}
 label{font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
-
-/* LAYOUT */
 #app{display:flex;height:100vh;overflow:hidden}
-#sidebar{width:250px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;transition:width .3s}
+#sidebar{width:250px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 #topbar{height:60px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0}
 #content{flex:1;overflow-y:auto;padding:20px;background:var(--bg)}
-
-/* SIDEBAR */
 .sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .sb-logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent2),#a78bfa);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.sb-logo h1{font-size:15px;font-weight:800;letter-spacing:-.4px}
-.sb-logo p{font-size:10px;color:var(--text3);font-weight:500}
+.sb-logo h1{font-size:15px;font-weight:800;letter-spacing:-.4px}.sb-logo p{font-size:10px;color:var(--text3);font-weight:500}
 .sb-user{margin:10px 10px 0;padding:10px 12px;background:var(--bg3);border-radius:var(--radius);border:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .sb-user-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden}
 .sb-user-av img{width:100%;height:100%;object-fit:cover}
 .sb-user-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
 .sb-user-email{font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
 .role-pill{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:inline-block;margin-top:3px}
-.rp-sa{background:rgba(167,139,250,.2);color:var(--accent)}
-.rp-prop{background:rgba(59,130,246,.2);color:#3b82f6}
-.rp-emp{background:rgba(16,185,129,.2);color:#10b981}
-.sb-nav{padding:10px 10px;flex:1}
+.rp-sa{background:rgba(167,139,250,.2);color:var(--accent)}.rp-prop{background:rgba(59,130,246,.2);color:#3b82f6}.rp-emp{background:rgba(16,185,129,.2);color:#10b981}
+.sb-nav{padding:10px;flex:1}
 .nav-sec-title{font-size:9px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;padding:8px 8px 3px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;transition:all .12s;margin-bottom:1px;border:1px solid transparent;position:relative}
-.nav-item:hover{background:var(--bg3);color:var(--text)}
-.nav-item.active{background:rgba(124,58,237,.15);color:var(--accent);border-color:rgba(124,58,237,.25)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;transition:all .12s;margin-bottom:1px;border:1px solid transparent}
+.nav-item:hover{background:var(--bg3);color:var(--text)}.nav-item.active{background:rgba(124,58,237,.15);color:var(--accent);border-color:rgba(124,58,237,.25)}
 .nav-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center}
 .nav-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;font-size:9px;padding:1px 6px;font-weight:700}
 .sb-bottom{padding:10px;border-top:1px solid var(--border)}
 .theme-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border-radius:var(--radius-sm);margin-bottom:6px;font-size:12px;color:var(--text2)}
 .sw{width:36px;height:20px;background:var(--border2);border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
-.sw.on{background:var(--accent2)}
-.sw-k{width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:transform .2s}
-.sw.on .sw-k{transform:translateX(16px)}
-.logout-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;color:var(--red);font-size:12px;font-weight:600;width:100%;background:none;border:none;text-align:left;transition:background .15s}
+.sw.on{background:var(--accent2)}.sw-k{width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:transform .2s}.sw.on .sw-k{transform:translateX(16px)}
+.logout-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;color:var(--red);font-size:12px;font-weight:600;width:100%;background:none;border:none;text-align:left}
 .logout-btn:hover{background:rgba(239,68,68,.1)}
-
-/* TOPBAR */
-.tb-title{font-size:17px;font-weight:800;letter-spacing:-.3px}
-.tb-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.tb-title{font-size:17px;font-weight:800;letter-spacing:-.3px}.tb-sub{font-size:11px;color:var(--text3);margin-top:1px}
 .tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
 .notif-wrap{position:relative}
-.notif-btn{width:36px;height:36px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:border-color .15s}
-.notif-btn:hover{border-color:var(--accent)}
+.notif-btn{width:36px;height:36px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px}
 .notif-dot{position:absolute;top:-3px;right:-3px;background:var(--red);color:#fff;border-radius:10px;font-size:9px;padding:1px 5px;font-weight:700;min-width:16px;text-align:center}
-.action-btn{padding:8px 14px;background:var(--accent2);color:#fff;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}
+.action-btn{padding:8px 14px;background:var(--accent2);color:#fff;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer}
 .action-btn:hover{background:var(--accent3)}
-
-/* NOTIF PANEL */
 .notif-panel{position:fixed;top:60px;right:12px;width:340px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);z-index:1000;max-height:440px;overflow-y:auto;display:none}
 .notif-panel.open{display:block}
 .notif-hdr{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;position:sticky;top:0;background:var(--card)}
-.notif-item{padding:12px 14px;border-bottom:1px solid var(--border);font-size:12px;display:flex;align-items:flex-start;gap:8px;cursor:pointer;transition:background .12s}
-.notif-item:hover{background:var(--bg3)}
+.notif-item{padding:12px 14px;border-bottom:1px solid var(--border);font-size:12px;display:flex;align-items:flex-start;gap:8px}
 .ndot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:3px}
-
-/* MODAL */
 .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:2000;padding:16px}
 .modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow)}
 .modal-lg{max-width:720px}
-.modal-xl{max-width:860px}
 .mh{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--card);z-index:1}
 .mh-title{font-size:15px;font-weight:800}
 .mb{padding:20px}
-.mf{padding:14px 20px;border-bottom:none;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--card)}
-.x-btn{width:28px;height:28px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0}
+.mf{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--card)}
+.x-btn{width:28px;height:28px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2)}
 .x-btn:hover{border-color:var(--red);color:var(--red)}
-.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.fg1{grid-column:1/-1}
-.fgrp{margin-bottom:12px}
-
-/* BUTTONS */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fg1{grid-column:1/-1}.fgrp{margin-bottom:12px}
 .btn{padding:8px 16px;border-radius:var(--radius-sm);font-size:12px;font-weight:700;border:none;display:inline-flex;align-items:center;gap:6px;cursor:pointer;transition:all .12s;white-space:nowrap}
 .btn-p{background:var(--accent2);color:#fff}.btn-p:hover{background:var(--accent3)}
 .btn-s{background:var(--bg3);color:var(--text);border:1px solid var(--border)}.btn-s:hover{border-color:var(--border2)}
 .btn-d{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.25)}.btn-d:hover{background:rgba(239,68,68,.2)}
-.btn-ok{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.25)}.btn-ok:hover{background:rgba(16,185,129,.2)}
-.btn-w{background:rgba(245,158,11,.1);color:var(--yellow);border:1px solid rgba(245,158,11,.25)}
-.btn-sm{padding:5px 10px;font-size:11px}
-.btn-xs{padding:3px 8px;font-size:10px}
-.btn-ico{padding:6px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px}.btn-ico:hover{border-color:var(--accent);color:var(--accent)}
-
-/* CARDS */
+.btn-ok{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+.btn-sm{padding:5px 10px;font-size:11px}.btn-xs{padding:3px 8px;font-size:10px}
+.btn-ico{padding:6px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;cursor:pointer}.btn-ico:hover{border-color:var(--accent);color:var(--accent)}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:14px;margin-bottom:20px}
-.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;transition:transform .15s,border-color .15s;cursor:default}
-.kpi:hover{transform:translateY(-2px);border-color:var(--border2)}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;transition:transform .15s}
+.kpi:hover{transform:translateY(-2px)}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
-.kpi.gr::before{background:var(--green)}.kpi.bl::before{background:var(--blue)}
-.kpi.vi::before{background:var(--accent)}.kpi.rd::before{background:var(--red)}
-.kpi.or::before{background:var(--orange)}.kpi.ye::before{background:var(--yellow)}
+.kpi.gr::before{background:var(--green)}.kpi.bl::before{background:var(--blue)}.kpi.vi::before{background:var(--accent)}.kpi.rd::before{background:var(--red)}.kpi.or::before{background:var(--orange)}.kpi.ye::before{background:var(--yellow)}
 .kpi-ico{width:40px;height:40px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:18px}
-.kpi-ico.gr{background:rgba(16,185,129,.15)}.kpi-ico.bl{background:rgba(59,130,246,.15)}
-.kpi-ico.vi{background:rgba(167,139,250,.15)}.kpi-ico.rd{background:rgba(239,68,68,.15)}
-.kpi-ico.or{background:rgba(249,115,22,.15)}.kpi-ico.ye{background:rgba(245,158,11,.15)}
+.kpi-ico.gr{background:rgba(16,185,129,.15)}.kpi-ico.bl{background:rgba(59,130,246,.15)}.kpi-ico.vi{background:rgba(167,139,250,.15)}.kpi-ico.rd{background:rgba(239,68,68,.15)}.kpi-ico.or{background:rgba(249,115,22,.15)}.kpi-ico.ye{background:rgba(245,158,11,.15)}
 .kpi-val{font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:4px}
-.kpi-label{font-size:12px;color:var(--text2);font-weight:600}
-.kpi-sub{font-size:11px;color:var(--text3);margin-top:3px}
-
-/* TABLE */
+.kpi-label{font-size:12px;color:var(--text2);font-weight:600}.kpi-sub{font-size:11px;color:var(--text3);margin-top:3px}
 .tw{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
 .tw-hdr{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
 .tw-title{font-size:14px;font-weight:800}
@@ -142,92 +99,57 @@ th{padding:10px 14px;text-align:left;font-size:10px;font-weight:800;color:var(--
 td{padding:11px 14px;font-size:12px;color:var(--text);border-bottom:1px solid var(--border);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:rgba(255,255,255,.015)}
-.light tbody tr:hover td{background:rgba(83,74,183,.025)}
-
-/* BADGE */
 .b{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
 .b::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
-.b-gr{background:rgba(16,185,129,.15);color:var(--green)}
-.b-rd{background:rgba(239,68,68,.15);color:var(--red)}
-.b-ye{background:rgba(245,158,11,.15);color:var(--yellow)}
-.b-bl{background:rgba(59,130,246,.15);color:var(--blue)}
-.b-gy{background:var(--bg3);color:var(--text3)}
-.b-or{background:rgba(249,115,22,.15);color:var(--orange)}
-.b-vi{background:rgba(167,139,250,.15);color:var(--accent)}
-
-/* MISC */
+.b-gr{background:rgba(16,185,129,.15);color:var(--green)}.b-rd{background:rgba(239,68,68,.15);color:var(--red)}.b-ye{background:rgba(245,158,11,.15);color:var(--yellow)}.b-bl{background:rgba(59,130,246,.15);color:#3b82f6}.b-gy{background:var(--bg3);color:var(--text3)}.b-or{background:rgba(249,115,22,.15);color:var(--orange)}.b-vi{background:rgba(167,139,250,.15);color:var(--accent)}
 .filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
-.srch{position:relative;flex:1;min-width:180px}
-.srch input{padding-left:34px}
+.srch{position:relative;flex:1;min-width:180px}.srch input{padding-left:34px}
 .srch-ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text3);pointer-events:none}
 .fsel{width:auto!important;min-width:130px}
-.empty-st{text-align:center;padding:50px 20px;color:var(--text3)}
-.empty-st .ei{font-size:42px;margin-bottom:12px}
-.empty-st h3{font-size:14px;font-weight:700;color:var(--text2);margin-bottom:6px}
-.empty-st p{font-size:12px}
+.empty-st{text-align:center;padding:50px 20px;color:var(--text3)}.empty-st .ei{font-size:42px;margin-bottom:12px}.empty-st h3{font-size:14px;font-weight:700;color:var(--text2);margin-bottom:6px}.empty-st p{font-size:12px}
 .av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;overflow:hidden}
 .av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.av-sm{width:30px;height:30px;font-size:11px}
-.av-md{width:38px;height:38px;font-size:13px}
-.av-lg{width:56px;height:56px;font-size:18px}
-.pg{display:flex;align-items:center;gap:4px;padding:12px 16px;border-top:1px solid var(--border);flex-wrap:wrap}
-.pg-btn{width:28px;height:28px;border-radius:6px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.pg-btn:hover{border-color:var(--accent);color:var(--accent)}
-.pg-btn.on{background:var(--accent2);color:#fff;border-color:var(--accent2)}
-.pg-info{margin-left:auto;font-size:11px;color:var(--text3)}
+.av-sm{width:30px;height:30px;font-size:11px}.av-md{width:38px;height:38px;font-size:13px}
 .alert{padding:10px 14px;border-radius:var(--radius-sm);font-size:12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:10px}
 .al-r{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#fca5a5}
 .al-y{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#fcd34d}
 .al-b{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#93c5fd}
 .al-g{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#6ee7b7}
-.al-v{background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:var(--accent)}
 .err-msg{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#fca5a5;padding:8px 12px;border-radius:var(--radius-sm);font-size:12px;margin-top:10px;display:none}
 .ok-msg{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#6ee7b7;padding:8px 12px;border-radius:var(--radius-sm);font-size:12px;margin-top:10px;display:none}
 .pg-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap}
-.pg-title{font-size:20px;font-weight:800;letter-spacing:-.5px}
-.pg-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.pg-title{font-size:20px;font-weight:800;letter-spacing:-.5px}.pg-sub{font-size:12px;color:var(--text3);margin-top:2px}
 .dr{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px}
-.dr:last-child{border-bottom:none}
-.dl{color:var(--text3);font-weight:600}
-.dv{color:var(--text);font-weight:700;text-align:right}
+.dr:last-child{border-bottom:none}.dl{color:var(--text3);font-weight:600}.dv{color:var(--text);font-weight:700;text-align:right}
 .charts-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:16px}
 .ch-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
 .ch-title{font-size:12px;font-weight:800;margin-bottom:14px;color:var(--text);text-transform:uppercase;letter-spacing:.4px}
 .tabs{display:flex;gap:3px;background:var(--bg3);border-radius:var(--radius-sm);padding:3px;width:fit-content;margin-bottom:16px}
 .tab{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text3);background:none;border:none;transition:all .15s}
 .tab.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.uplz{border:2px dashed var(--border2);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:all .15s;background:var(--bg3);position:relative}
-.uplz:hover{border-color:var(--accent);background:rgba(124,58,237,.05)}
-.uplz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.uplz-ico{font-size:28px;margin-bottom:6px}
-.uplz-txt{font-size:11px;color:var(--text3)}
-.logo-preview{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border2)}
 .chg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
-
-/* LOGIN */
 #login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
 .ln-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 15% 50%,rgba(124,58,237,.2) 0%,transparent 55%),radial-gradient(ellipse at 85% 15%,rgba(59,130,246,.12) 0%,transparent 45%)}
 .ln-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px;width:100%;max-width:400px;position:relative;z-index:1;box-shadow:var(--shadow)}
 .ln-logo{text-align:center;margin-bottom:28px}
 .ln-logo-icon{width:52px;height:52px;background:linear-gradient(135deg,var(--accent2),#a78bfa);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 10px}
-.ln-logo h1{font-size:22px;font-weight:800;letter-spacing:-.5px}
-.ln-logo p{font-size:12px;color:var(--text3);margin-top:3px}
-.ln-btn{width:100%;padding:11px;background:var(--accent2);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:800;cursor:pointer;margin-top:6px;transition:all .15s;letter-spacing:.3px}
+.ln-logo h1{font-size:22px;font-weight:800;letter-spacing:-.5px}.ln-logo p{font-size:12px;color:var(--text3);margin-top:3px}
+.ln-btn{width:100%;padding:11px;background:var(--accent2);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:800;cursor:pointer;margin-top:6px;transition:all .15s}
 .ln-btn:hover{background:var(--accent3)}
-
-@media(max-width:768px){
-#sidebar{position:fixed;left:-250px;height:100%;z-index:300;transition:left .3s}
-#sidebar.mob-open{left:0}
-.kpi-grid{grid-template-columns:1fr 1fr}
-.charts-grid{grid-template-columns:1fr}
-.fg{grid-template-columns:1fr}
-}
+.loading-ov{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:14px}
+.spin{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(max-width:768px){#sidebar{position:fixed;left:-250px;height:100%;z-index:300;transition:left .3s}#sidebar.mob-open{left:0}.kpi-grid{grid-template-columns:1fr 1fr}.charts-grid{grid-template-columns:1fr}.fg{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<!-- ===== LOGIN ===== -->
-<div id="login-page">
+<div class="loading-ov" id="load-ov">
+  <div class="spin"></div>
+  <div style="font-size:13px;color:var(--text3)">Chargement Sama Flotte…</div>
+</div>
+
+<div id="login-page" style="display:none">
 <div class="ln-bg"></div>
 <div class="ln-card">
   <div class="ln-logo">
@@ -243,18 +165,17 @@ tbody tr:hover td{background:rgba(255,255,255,.015)}
 </div>
 </div>
 
-<!-- ===== APP ===== -->
 <div id="app" style="display:none">
   <div id="sidebar">
     <div class="sb-logo">
       <div class="sb-logo-icon">🚌</div>
-      <div><h1>Sama Flotte</h1><p>v2.0 — Gestion flotte</p></div>
+      <div><h1>Sama Flotte</h1><p>v2.0 — Supabase</p></div>
     </div>
     <div class="sb-user">
-      <div class="sb-user-av" id="sb-av" style="background:#7c3aed;color:#fff">SA</div>
+      <div class="sb-user-av" id="sb-av" style="background:#7c3aed">SA</div>
       <div style="min-width:0">
-        <div class="sb-user-name" id="sb-name">Aliou Cissé</div>
-        <div class="sb-user-email" id="sb-email">admin@samaflotte.sn</div>
+        <div class="sb-user-name" id="sb-name">Chargement…</div>
+        <div class="sb-user-email" id="sb-email"></div>
         <div class="role-pill rp-sa" id="sb-role">Super Admin</div>
       </div>
     </div>
@@ -267,18 +188,12 @@ tbody tr:hover td{background:rgba(255,255,255,.015)}
       <button class="logout-btn" onclick="doLogout()">🚪 Déconnexion</button>
     </div>
   </div>
-
   <div id="main">
     <div id="topbar">
-      <div>
-        <div class="tb-title" id="tb-title">Tableau de bord</div>
-        <div class="tb-sub" id="tb-sub">Vue globale</div>
-      </div>
+      <div><div class="tb-title" id="tb-title">Tableau de bord</div><div class="tb-sub" id="tb-sub">Vue globale</div></div>
       <div class="tb-right">
         <div class="notif-wrap">
-          <div class="notif-btn" id="notif-btn" onclick="toggleNotif()">🔔
-            <div class="notif-dot" id="n-dot" style="display:none">0</div>
-          </div>
+          <div class="notif-btn" onclick="toggleNotif()">🔔<div class="notif-dot" id="n-dot" style="display:none">0</div></div>
         </div>
         <button class="action-btn" id="top-btn" style="display:none" onclick="topAction()">
           <span id="top-btn-ico">＋</span><span id="top-btn-txt">Ajouter</span>
@@ -289,153 +204,152 @@ tbody tr:hover td{background:rgba(255,255,255,.015)}
   </div>
 </div>
 
-<!-- NOTIF PANEL -->
 <div class="notif-panel" id="notif-panel">
-  <div class="notif-hdr">🔔 Notifications
-    <span style="font-size:11px;color:var(--accent);cursor:pointer" onclick="markAllRead()">Tout lu</span>
-  </div>
+  <div class="notif-hdr">🔔 Notifications <span style="font-size:11px;color:var(--accent);cursor:pointer" onclick="markAllRead()">Tout lu</span></div>
   <div id="n-list"></div>
 </div>
 
-<!-- MODAL -->
 <div class="modal-ov" id="modal-ov" style="display:none" onclick="ovClick(event)">
   <div id="modal-box" class="modal"></div>
 </div>
 
 <script>
-// ============================================================
-// UTILS
-// ============================================================
-const $ = id => document.getElementById(id);
-const DB = {
-  g(k){try{return JSON.parse(localStorage.getItem('sf2_'+k)||'null')}catch{return null}},
-  s(k,v){try{localStorage.setItem('sf2_'+k,JSON.stringify(v))}catch(e){console.warn('DB.s',e)}},
-  d(k){localStorage.removeItem('sf2_'+k)}
-};
-const uid = () => 'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-const now = () => new Date().toISOString();
-const fd  = d => d ? new Date(d).toLocaleDateString('fr-FR') : '—';
-const fdt = d => d ? new Date(d).toLocaleString('fr-FR') : '—';
-const fm  = n => new Intl.NumberFormat('fr-FR').format(n||0)+' FCFA';
-const fn  = n => new Intl.NumberFormat('fr-FR').format(n||0);
-const gv  = id => ($( id)?.value||'').trim();
-const gvr = id => ($( id)?.value||'');
+// =============================================
+// SUPABASE
+// =============================================
+const SB_URL='https://qbhftwpkfocvijgoxkxq.supabase.co';
+const SB_KEY='sb_publishable_GcZZ53Ah4VhRgtrbkDG8TA_RvT87dlk';
+const sb=supabase.createClient(SB_URL,SB_KEY);
 
-function ini(n,p){
-  return((p||'')[0]||(n||'')[0]||'?').toUpperCase()+((n||'')[0]||'').toUpperCase();
-}
-function avc(s){
-  const c=['#7c3aed','#3b82f6','#10b981','#f59e0b','#ef4444','#ec4899','#06b6d4','#84cc16'];
-  let h=0;for(let ch of(s||''))h+=ch.charCodeAt(0);
-  return c[h%c.length];
-}
-function hpwd(p){let h=0;for(let i=0;i<p.length;i++){h=((h<<5)-h)+p.charCodeAt(i);h|=0}return'h$'+Math.abs(h)+'$'+btoa(unescape(encodeURIComponent(p)));}
-function cpwd(p,h){if(!h)return false;try{const parts=h.split('$');if(parts[0]==='h')return decodeURIComponent(escape(atob(parts[2])))===p;}catch{return false;}return false;}
+// =============================================
+// UTILS
+// =============================================
+const $=id=>document.getElementById(id);
+const uid=()=>'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const now=()=>new Date().toISOString();
+const fd=d=>d?new Date(d).toLocaleDateString('fr-FR'):'—';
+const fdt=d=>d?new Date(d).toLocaleString('fr-FR'):'—';
+const fm=n=>new Intl.NumberFormat('fr-FR').format(n||0)+' FCFA';
+const fn=n=>new Intl.NumberFormat('fr-FR').format(n||0);
+const gv=id=>($(id)?.value||'').trim();
+const gvr=id=>($(id)?.value||'');
+function ini(n,p){return((p||'')[0]||(n||'')[0]||'?').toUpperCase()+((n||'')[0]||'').toUpperCase();}
+function avc(s){const c=['#7c3aed','#3b82f6','#10b981','#f59e0b','#ef4444','#ec4899','#06b6d4','#84cc16'];let h=0;for(let ch of(s||''))h+=ch.charCodeAt(0);return c[h%c.length];}
 function daysDiff(d){if(!d)return 9999;return Math.floor((new Date(d)-new Date())/(864e5));}
-function av(name,prenom,color,size,logo){
+function avEl(name,prenom,color,size,logo){
   const bg=color||avc((prenom||'')+(name||''));
-  const cls='av av-'+( size||'sm');
-  if(logo)return`<div class="${cls}" style="background:${bg}">${`<img src="${logo}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`}</div>`;
+  const cls='av av-'+(size||'sm');
+  if(logo)return`<div class="${cls}" style="background:${bg}"><img src="${logo}" alt=""></div>`;
   return`<div class="${cls}" style="background:${bg};color:#fff">${ini(name,prenom)}</div>`;
 }
-function log(action,detail){
-  const acts=DB.g('activity')||[];
-  acts.unshift({id:uid(),uid:CU?.id,action,detail,ts:now()});
-  DB.s('activity',acts.slice(0,500));
+function readFile(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(file);});}
+
+// =============================================
+// CACHE LOCAL
+// =============================================
+let C={users:[],proprietaires:[],vehicules:[],conducteurs:[],affectations:[],versements:[],depenses:[],employes:[],activity:[]};
+
+async function loadAll(){
+  try{
+    const [u,pr,ve,co,af,ver,dep,emp,act]=await Promise.all([
+      sb.from('users').select('*'),
+      sb.from('proprietaires').select('*'),
+      sb.from('vehicules').select('*'),
+      sb.from('conducteurs').select('*'),
+      sb.from('affectations').select('*'),
+      sb.from('versements').select('*'),
+      sb.from('depenses').select('*'),
+      sb.from('employes').select('*'),
+      sb.from('activity').select('*').order('ts',{ascending:false}).limit(300),
+    ]);
+    C.users=u.data||[];C.proprietaires=pr.data||[];C.vehicules=ve.data||[];
+    C.conducteurs=co.data||[];C.affectations=af.data||[];C.versements=ver.data||[];
+    C.depenses=dep.data||[];C.employes=emp.data||[];C.activity=act.data||[];
+  }catch(e){console.error('loadAll',e);}
 }
 
-// ============================================================
-// DATA REF
-// ============================================================
+async function dbIns(table,row){
+  const {data,error}=await sb.from(table).insert([row]).select();
+  if(error){console.error('ins',table,error);return null;}
+  if(data?.[0])C[table]=[...(C[table]||[]),data[0]];
+  return data?.[0];
+}
+async function dbUpd(table,id,upd){
+  const {error}=await sb.from(table).update(upd).eq('id',id);
+  if(error){console.error('upd',table,error);return false;}
+  C[table]=C[table].map(r=>r.id===id?{...r,...upd}:r);
+  return true;
+}
+async function dbDel(table,id){
+  const {error}=await sb.from(table).delete().eq('id',id);
+  if(error){console.error('del',table,error);return false;}
+  C[table]=C[table].filter(r=>r.id!==id);
+  return true;
+}
+async function addLog(action,detail){
+  const row={id:uid(),user_id:CU?.id,action,detail,ts:now()};
+  await sb.from('activity').insert([row]);
+  C.activity.unshift(row);
+}
+
+// =============================================
+// REF DATA
+// =============================================
 const MARQUES=['Abarth','Acura','Alfa Romeo','Aston Martin','Audi','Bentley','BMW','Bugatti','Buick','Cadillac','Chevrolet','Chrysler','Citroën','Dacia','Daewoo','Daihatsu','Dodge','DS','Ferrari','Fiat','Ford','Geely','GMC','Honda','Hummer','Hyundai','Infiniti','Isuzu','Jaguar','Jeep','Kia','Koenigsegg','Lada','Lamborghini','Lancia','Land Rover','Lexus','Lincoln','Lotus','Maserati','Mazda','McLaren','Mercedes-Benz','MG','Mini','Mitsubishi','Nissan','Opel','Peugeot','Porsche','Renault','Rolls-Royce','Seat','Skoda','Smart','Subaru','Suzuki','Tesla','Toyota','Volkswagen','Volvo','BYD','Chery','Haval','Rivian','Lucid','Ram','SsangYong'].sort();
 const TYPES_V=['Berline','SUV','Crossover','Break','Coupé','Cabriolet','Monospace','Pick-up','Fourgonnette','Fourgon','Camionnette','Camion léger','Camion lourd','Semi-remorque','Bus','Minibus','Microbus','Taxi berline','Taxi SUV','Tricycle motorisé','Tuk-tuk','Ambulance','Benne basculante','Citerne','Grue','Tracteur','Remorque'];
 const CATS_DEP=['Carburant','Entretien / Mécanique','Assurance','Vignette / Taxes','Réparation','Pneus','Lavage','Salaire / Prime','Péage','Parking','Amende','Pièces détachées','Autre'];
-const STATUTS_V=['actif','maintenance','hors_service','location'];
 const SL_V={actif:'b-gr',maintenance:'b-ye',hors_service:'b-rd',location:'b-bl'};
 const SL_VL={actif:'Actif',maintenance:'Maintenance',hors_service:'Hors service',location:'En location'};
+const STATUTS_V=['actif','maintenance','hors_service','location'];
 const STATUTS_C=['actif','suspendu','inactif'];
 const STATUTS_VER=['valide','attente','litige'];
 
-// ============================================================
-// DB INIT (empty)
-// ============================================================
-function initDB(){
-  if(DB.g('init')) return;
-  const sa={id:'u1',nom:'Cissé',prenom:'Aliou',email:'ngaryservicepro@ngary.sn',
-    pwd:hpwd('775097417@Az'),role:'superadmin',actif:true,created:now(),tel:'+221 77 509 74 17',adresse:'Dakar, Sénégal',logo:null};
-  DB.s('users',[sa]);
-  DB.s('proprietaires',[]);
-  DB.s('vehicules',[]);
-  DB.s('conducteurs',[]);
-  DB.s('affectations',[]);
-  DB.s('versements',[]);
-  DB.s('depenses',[]);
-  DB.s('employes',[]);
-  DB.s('activity',[]);
-  DB.s('init',true);
-}
-
-// ============================================================
+// =============================================
 // AUTH
-// ============================================================
-let CU = null; // current user
-let isDark = true;
-let notifOpen = false;
-let curPage = 'dashboard';
-let topActionFn = null;
+// =============================================
+let CU=null,isDark=true,notifOpen=false,curPage='dashboard',topActionFn=null;
 
-function doLogin(){
-  const email=gv('ln-email'), pwd=gvr('ln-pwd');
-  const err=$('ln-err'); err.style.display='none';
-  if(!email||!pwd){err.textContent='Email et mot de passe requis';err.style.display='block';return}
-  const users=DB.g('users')||[];
-  const u=users.find(x=>x.email.toLowerCase()===email.toLowerCase());
-  if(!u||u.actif===false){err.textContent='Compte introuvable ou suspendu';err.style.display='block';return}
-  if(!cpwd(pwd,u.pwd)){err.textContent='Mot de passe incorrect';err.style.display='block';return}
-  CU=u; DB.s('session',{uid:u.id,ts:Date.now()});
-  startApp();
+async function doLogin(){
+  const email=gv('ln-email'),pwd=gvr('ln-pwd');
+  const err=$('ln-err');err.style.display='none';
+  if(!email||!pwd){err.textContent='Email et mot de passe requis';err.style.display='block';return;}
+  $('ln-btn').textContent='Connexion…';$('ln-btn').disabled=true;
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email,password:pwd});
+    if(error){err.textContent='Email ou mot de passe incorrect';err.style.display='block';return;}
+    const {data:uData}=await sb.from('users').select('*').eq('auth_id',data.user.id).single();
+    if(!uData){err.textContent='Profil introuvable.';err.style.display='block';return;}
+    if(uData.actif===false){err.textContent='Compte suspendu.';err.style.display='block';return;}
+    CU=uData;await loadAll();startApp();
+  }catch(e){err.textContent='Erreur de connexion';err.style.display='block';}
+  finally{$('ln-btn').textContent='Connexion →';$('ln-btn').disabled=false;}
 }
 
-function doLogout(){
-  CU=null; DB.d('session');
-  $('app').style.display='none';
-  $('login-page').style.display='flex';
-  $('ln-pwd').value='';
-}
-
-function chkSession(){
-  const s=DB.g('session'); if(!s) return false;
-  const u=(DB.g('users')||[]).find(x=>x.id===s.uid);
-  if(u&&u.actif!==false){CU=u;return true;} return false;
+async function doLogout(){
+  await sb.auth.signOut();CU=null;
+  $('app').style.display='none';$('login-page').style.display='flex';$('ln-pwd').value='';
 }
 
 function startApp(){
-  $('login-page').style.display='none';
-  $('app').style.display='flex';
-  refreshUser();
-  buildNav();
-  navTo('dashboard');
-  buildNotifs();
+  $('login-page').style.display='none';$('app').style.display='flex';
+  refreshUser();buildNav();navTo('dashboard');buildNotifs();
 }
 
-// ============================================================
+// =============================================
 // THEME
-// ============================================================
+// =============================================
 function toggleTheme(){
-  isDark=!isDark;
-  document.body.classList.toggle('light',!isDark);
-  const sw=$('sw-theme');
-  sw.classList.toggle('on',isDark);
+  isDark=!isDark;document.body.classList.toggle('light',!isDark);
+  $('sw-theme').classList.toggle('on',isDark);
   $('theme-lbl').textContent=isDark?'🌙 Mode sombre':'☀️ Mode clair';
-  DB.s('theme',isDark?'dark':'light');
+  localStorage.setItem('sf2_theme',isDark?'dark':'light');
 }
 
-// ============================================================
-// SIDEBAR
-// ============================================================
+// =============================================
+// SIDEBAR / NAV
+// =============================================
 function refreshUser(){
   const u=CU;
-  // Avatar with logo
   const sbAv=$('sb-av');
   if(u.logo){sbAv.innerHTML=`<img src="${u.logo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;sbAv.style.background='transparent';}
   else{sbAv.textContent=ini(u.nom,u.prenom);sbAv.style.background=avc(u.email);}
@@ -443,14 +357,13 @@ function refreshUser(){
   $('sb-email').textContent=u.email;
   const rp=$('sb-role');
   const rl={superadmin:['Super Admin','rp-sa'],proprietaire:['Propriétaire','rp-prop'],employe:['Employé','rp-emp']};
-  const [rtxt,rcls]=rl[u.role]||['Utilisateur','rp-emp'];
-  rp.textContent=rtxt; rp.className='role-pill '+rcls;
+  const[rtxt,rcls]=rl[u.role]||['Utilisateur','rp-emp'];
+  rp.textContent=rtxt;rp.className='role-pill '+rcls;
 }
 
 function buildNav(){
   const r=CU.role;
-  let emp=null;
-  if(r==='employe'){const emps=DB.g('employes')||[];emp=emps.find(e=>e.utilisateur_id===CU.id)||{};}
+  let emp=r==='employe'?C.employes.find(e=>e.utilisateur_id===CU.id)||{}:null;
   const menu=[
     {id:'dashboard',ico:'📊',lbl:'Tableau de bord',roles:['superadmin','proprietaire','employe']},
     {id:'proprietaires',ico:'👥',lbl:'Propriétaires',roles:['superadmin']},
@@ -466,30 +379,20 @@ function buildNav(){
   const alerts=getDocAlerts().length;
   let html='<div class="nav-sec-title">Navigation</div>';
   for(const m of menu){
-    if(!m.roles.includes(r)) continue;
-    if(r==='employe'&&emp&&m.perm){const p=emp.permissions||{};if(p[m.perm]===false) continue;}
+    if(!m.roles.includes(r))continue;
+    if(r==='employe'&&emp&&m.perm&&(emp.permissions||{})[m.perm]===false)continue;
     const al=m.id==='conducteurs'&&alerts>0?`<span class="nav-badge">${alerts}</span>`:'';
-    html+=`<div class="nav-item${curPage===m.id?' active':''}" onclick="navTo('${m.id}')">
-      <span class="nav-icon">${m.ico}</span><span>${m.lbl}</span>${al}
-    </div>`;
+    html+=`<div class="nav-item${curPage===m.id?' active':''}" onclick="navTo('${m.id}')"><span class="nav-icon">${m.ico}</span><span>${m.lbl}</span>${al}</div>`;
   }
   $('sb-nav').innerHTML=html;
 }
 
-// ============================================================
-// NAVIGATION
-// ============================================================
 const PAGE_META={
-  dashboard:{title:'Tableau de bord',sub:'Vue globale de la plateforme'},
-  proprietaires:{title:'Propriétaires',sub:'Gestion des comptes propriétaires'},
-  vehicules:{title:'Véhicules',sub:'Parc automobile'},
-  conducteurs:{title:'Conducteurs',sub:'Gestion des conducteurs'},
-  versements:{title:'Versements',sub:'Saisie et suivi journalier'},
-  depenses:{title:'Dépenses',sub:'Suivi des dépenses'},
-  rapports:{title:'Rapports & Exports',sub:'Génération et export'},
-  utilisateurs:{title:'Gestion des accès',sub:'Permissions et comptes'},
-  activite:{title:"Journal d'activité",sub:'Traçabilité des actions'},
-  profil:{title:'Mon profil',sub:'Paramètres du compte'},
+  dashboard:{title:'Tableau de bord',sub:'Vue globale'},proprietaires:{title:'Propriétaires',sub:'Gestion des comptes propriétaires'},
+  vehicules:{title:'Véhicules',sub:'Parc automobile'},conducteurs:{title:'Conducteurs',sub:'Gestion des conducteurs'},
+  versements:{title:'Versements',sub:'Saisie et suivi journalier'},depenses:{title:'Dépenses',sub:'Suivi des dépenses'},
+  rapports:{title:'Rapports & Exports',sub:'Génération et export'},utilisateurs:{title:'Gestion des accès',sub:'Permissions et comptes'},
+  activite:{title:"Journal d'activité",sub:'Traçabilité'},profil:{title:'Mon profil',sub:'Paramètres'},
 };
 const PAGE_ACTIONS={
   proprietaires:{roles:['superadmin'],ico:'＋',txt:'Nouveau propriétaire',fn:'openAddProp'},
@@ -501,256 +404,122 @@ const PAGE_ACTIONS={
 };
 
 function navTo(page){
-  curPage=page; buildNav();
+  curPage=page;buildNav();
   const m=PAGE_META[page]||{title:page,sub:''};
-  $('tb-title').textContent=m.title; $('tb-sub').textContent=m.sub;
-  const ac=PAGE_ACTIONS[page];
-  const tb=$('top-btn');
-  if(ac&&ac.roles.includes(CU.role)){
-    tb.style.display='flex';
-    $('top-btn-ico').textContent=ac.ico; $('top-btn-txt').textContent=ac.txt;
-    topActionFn=window[ac.fn];
-  }else{tb.style.display='none';topActionFn=null;}
-  // check perm for employe
-  if(CU.role==='employe'&&ac){
-    const emps=DB.g('employes')||[];const emp=emps.find(e=>e.utilisateur_id===CU.id)||{};
-    const pa=PAGE_ACTIONS[page];if(pa&&pa.perm&&(emp.permissions||{})[pa.perm]===false) tb.style.display='none';
-  }
+  $('tb-title').textContent=m.title;$('tb-sub').textContent=m.sub;
+  const ac=PAGE_ACTIONS[page];const tb=$('top-btn');
+  if(ac&&ac.roles.includes(CU.role)){tb.style.display='flex';$('top-btn-ico').textContent=ac.ico;$('top-btn-txt').textContent=ac.txt;topActionFn=window[ac.fn];}
+  else{tb.style.display='none';topActionFn=null;}
   renderPage(page);
 }
-function topAction(){if(topActionFn) topActionFn();}
-
-// ============================================================
-// RENDER ROUTER
-// ============================================================
+function topAction(){if(topActionFn)topActionFn();}
 function renderPage(p){
-  const map={
-    dashboard:renderDash,proprietaires:renderProps,vehicules:renderVehs,
-    conducteurs:renderConds,versements:renderVers,depenses:renderDeps,
-    rapports:renderRapports,utilisateurs:renderUsers,activite:renderActivity,profil:renderProfil
-  };
-  const fn=map[p];
-  if(fn) fn();
-  else $('content').innerHTML='<div class="empty-st"><div class="ei">🚧</div><h3>Page en construction</h3></div>';
+  const map={dashboard:renderDash,proprietaires:renderProps,vehicules:renderVehs,conducteurs:renderConds,versements:renderVers,depenses:renderDeps,rapports:renderRapports,utilisateurs:renderUsers,activite:renderActivity,profil:renderProfil};
+  (map[p]||(()=>$('content').innerHTML='<div class="empty-st"><div class="ei">🚧</div><h3>En construction</h3></div>'))();
 }
 
-// ============================================================
+// =============================================
+// HELPERS
+// =============================================
+function myVehs(){const all=C.vehicules;if(CU.role==='superadmin')return all;if(CU.role==='proprietaire')return all.filter(v=>v.prop_id===CU.id);const e=getEmp();return e?.prop_id?all.filter(v=>v.prop_id===e.prop_id):[];}
+function myConds(){const all=C.conducteurs;if(CU.role==='superadmin')return all;if(CU.role==='proprietaire')return all.filter(c=>c.prop_id===CU.id);const e=getEmp();return e?.prop_id?all.filter(c=>c.prop_id===e.prop_id):[];}
+function myVers(){const all=C.versements;if(CU.role==='superadmin')return all;if(CU.role==='proprietaire')return all.filter(v=>v.prop_id===CU.id);const e=getEmp();return e?.prop_id?all.filter(v=>v.prop_id===e.prop_id):[];}
+function myDeps(){const all=C.depenses;if(CU.role==='superadmin')return all;if(CU.role==='proprietaire')return all.filter(d=>d.prop_id===CU.id);const e=getEmp();return e?.prop_id?all.filter(d=>d.prop_id===e.prop_id):[];}
+function getEmp(){return C.employes.find(e=>e.utilisateur_id===CU.id)||null;}
+function getUser(id){return C.users.find(u=>u.id===id)||null;}
+function getVeh(id){return C.vehicules.find(v=>v.id===id)||null;}
+function getCond(id){return C.conducteurs.find(c=>c.id===id)||null;}
+function getPropId(){if(CU.role==='superadmin')return null;if(CU.role==='proprietaire')return CU.id;return getEmp()?.prop_id||null;}
+function propsSelect(sel){return C.proprietaires.map(p=>{const u=getUser(p.uid)||{};return`<option value="${p.uid}"${p.uid===sel?' selected':''}>${u.prenom||'?'} ${u.nom||''}</option>`;}).join('');}
+function statusBadge(s){return{valide:'<span class="b b-gr">Validé</span>',attente:'<span class="b b-ye">En attente</span>',litige:'<span class="b b-rd">Litige</span>'}[s]||`<span class="b b-gy">${s||'—'}</span>`;}
+function vehBadge(s){return`<span class="b ${SL_V[s]||'b-gy'}">${SL_VL[s]||s||'—'}</span>`;}
+
+// =============================================
 // NOTIFICATIONS
-// ============================================================
+// =============================================
 function getDocAlerts(){
-  const conds=DB.g('conducteurs')||[];
   const res=[];
-  for(const c of conds){
-    if(CU.role==='proprietaire'&&c.prop_id!==CU.id) continue;
-    const ck=(label,date,url)=>{
-      if(!url&&!date){res.push({t:'b',msg:`${c.prenom} ${c.nom}: ${label} manquant`});return;}
-      if(date){const d=daysDiff(date);
-        if(d<0) res.push({t:'r',msg:`${c.prenom} ${c.nom}: ${label} expiré (${Math.abs(d)}j)`});
-        else if(d<30) res.push({t:'y',msg:`${c.prenom} ${c.nom}: ${label} expire dans ${d}j`});
-      }
+  for(const c of C.conducteurs){
+    if(CU.role==='proprietaire'&&c.prop_id!==CU.id)continue;
+    const ck=(lbl,date,url)=>{
+      if(!url&&!date){res.push({t:'b',msg:`${c.prenom} ${c.nom}: ${lbl} manquant`});return;}
+      if(date){const d=daysDiff(date);if(d<0)res.push({t:'r',msg:`${c.prenom} ${c.nom}: ${lbl} expiré`});else if(d<30)res.push({t:'y',msg:`${c.prenom} ${c.nom}: ${lbl} expire dans ${d}j`});}
     };
     ck('CNI',c.cni_exp,c.cni_url);ck('Permis',c.permis_exp,c.permis_url);
   }
   return res;
 }
-
 function buildNotifs(){
-  const al=getDocAlerts();
-  const nd=$('n-dot');
+  const al=getDocAlerts();const nd=$('n-dot');
   if(al.length>0){nd.textContent=al.length;nd.style.display='block';}else nd.style.display='none';
-  const vers=DB.g('versements')||[];
-  const td=new Date().toDateString();
-  const tvd=vers.filter(v=>new Date(v.date).toDateString()===td);
-  let html='';
-  if(al.length===0&&tvd.length===0){html='<div class="empty-st" style="padding:28px"><div class="ei">✅</div><p>Aucune alerte</p></div>';}
-  const cols={r:'var(--red)',y:'var(--yellow)',b:'var(--blue)',g:'var(--green)'};
-  for(const a of al){
-    html+=`<div class="notif-item"><div class="ndot" style="background:${cols[a.t]||'gray'}"></div><span>${a.msg}</span></div>`;
-  }
-  if(tvd.length>0){
-    html+=`<div class="notif-item"><div class="ndot" style="background:var(--green)"></div><span>${tvd.length} versement(s) saisi(s) aujourd'hui — Total: ${fm(tvd.reduce((s,v)=>s+(v.montant||0),0))}</span></div>`;
-  }
-  if(!html) html='<div class="empty-st" style="padding:28px"><div class="ei">🔔</div><p>Aucune notification</p></div>';
+  const cols={r:'var(--red)',y:'var(--yellow)',b:'var(--blue)'};
+  let html=al.map(a=>`<div class="notif-item"><div class="ndot" style="background:${cols[a.t]||'gray'}"></div><span>${a.msg}</span></div>`).join('');
+  if(!html)html='<div class="empty-st" style="padding:28px"><div class="ei">✅</div><p>Aucune alerte</p></div>';
   $('n-list').innerHTML=html;
 }
-
 function toggleNotif(){notifOpen=!notifOpen;buildNotifs();$('notif-panel').classList.toggle('open',notifOpen);}
-function markAllRead(){$('n-list').innerHTML='<div class="empty-st" style="padding:28px"><p>Notifications lues</p></div>';$('n-dot').style.display='none';}
-document.addEventListener('click',e=>{
-  if(!e.target.closest('#notif-btn')&&!e.target.closest('#notif-panel')){notifOpen=false;$('notif-panel').classList.remove('open');}
-});
+function markAllRead(){$('n-list').innerHTML='<div class="empty-st" style="padding:28px"><p>Lu</p></div>';$('n-dot').style.display='none';}
+document.addEventListener('click',e=>{if(!e.target.closest('#notif-btn')&&!e.target.closest('#notif-panel')){notifOpen=false;$('notif-panel').classList.remove('open');}});
 
-// ============================================================
+// =============================================
 // MODAL
-// ============================================================
-function openModal(html,size){
-  const box=$('modal-box');box.innerHTML=html;
-  box.className='modal'+(size?' modal-'+size:'');
-  $('modal-ov').style.display='flex';
-}
+// =============================================
+function openModal(html,size){const box=$('modal-box');box.innerHTML=html;box.className='modal'+(size?' modal-'+size:'');$('modal-ov').style.display='flex';}
 function closeModal(){$('modal-ov').style.display='none';}
-function ovClick(e){if(e.target===$('modal-ov')) closeModal();}
+function ovClick(e){if(e.target===$('modal-ov'))closeModal();}
 
-// ============================================================
-// HELPERS
-// ============================================================
-function myProps(){const all=DB.g('proprietaires')||[];return CU.role==='superadmin'?all:all.filter(p=>p.uid===CU.id);}
-function myVehs(){
-  const all=DB.g('vehicules')||[];
-  if(CU.role==='superadmin') return all;
-  if(CU.role==='proprietaire') return all.filter(v=>v.prop_id===CU.id);
-  const emp=getEmp();if(emp&&emp.prop_id) return all.filter(v=>v.prop_id===emp.prop_id);
-  return[];
-}
-function myConds(){
-  const all=DB.g('conducteurs')||[];
-  if(CU.role==='superadmin') return all;
-  if(CU.role==='proprietaire') return all.filter(c=>c.prop_id===CU.id);
-  const emp=getEmp();if(emp&&emp.prop_id) return all.filter(c=>c.prop_id===emp.prop_id);
-  return[];
-}
-function myVers(){
-  const all=DB.g('versements')||[];
-  if(CU.role==='superadmin') return all;
-  if(CU.role==='proprietaire') return all.filter(v=>v.prop_id===CU.id);
-  const emp=getEmp();if(emp&&emp.prop_id) return all.filter(v=>v.prop_id===emp.prop_id);
-  return[];
-}
-function myDeps(){
-  const all=DB.g('depenses')||[];
-  if(CU.role==='superadmin') return all;
-  if(CU.role==='proprietaire') return all.filter(d=>d.prop_id===CU.id);
-  const emp=getEmp();if(emp&&emp.prop_id) return all.filter(d=>d.prop_id===emp.prop_id);
-  return[];
-}
-function getEmp(){const emps=DB.g('employes')||[];return emps.find(e=>e.utilisateur_id===CU.id)||null;}
-function getUser(id){return(DB.g('users')||[]).find(u=>u.id===id)||null;}
-function getVeh(id){return(DB.g('vehicules')||[]).find(v=>v.id===id)||null;}
-function getCond(id){return(DB.g('conducteurs')||[]).find(c=>c.id===id)||null;}
-function getPropUser(prop_id){
-  // prop_id is the user id of proprietaire
-  return getUser(prop_id);
-}
-function propsSelect(sel){
-  const props=DB.g('proprietaires')||[];const users=DB.g('users')||[];
-  return props.map(p=>{const u=getUser(p.uid)||{};return`<option value="${p.uid}"${p.uid===sel?' selected':''}>${u.prenom||'?'} ${u.nom||''}</option>`;}).join('');
-}
-function getPropId(){
-  if(CU.role==='superadmin') return null;
-  if(CU.role==='proprietaire') return CU.id;
-  const emp=getEmp();return emp?.prop_id||null;
-}
-function statusBadge(s){
-  const m={valide:'<span class="b b-gr">Validé</span>',attente:'<span class="b b-ye">En attente</span>',litige:'<span class="b b-rd">Litige</span>'};
-  return m[s]||`<span class="b b-gy">${s||'—'}</span>`;
-}
-function vehStatusBadge(s){return`<span class="b ${SL_V[s]||'b-gy'}">${SL_VL[s]||s||'—'}</span>`;}
-function readFileAsDataURL(file){
-  return new Promise((res,rej)=>{
-    const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(file);
-  });
-}
-
-// ============================================================
+// =============================================
 // DASHBOARD
-// ============================================================
-function renderDash(){
-  const vers=myVers(); const vehs=myVehs(); const conds=myConds(); const deps=myDeps();
-  const props=DB.g('proprietaires')||[];
-  const td=new Date(); const tdStr=td.toDateString();
-  const mStart=new Date(td.getFullYear(),td.getMonth(),1);
-  const vVal=vers.filter(v=>v.statut==='valide');
-  const tdVers=vVal.filter(v=>new Date(v.date).toDateString()===tdStr);
-  const mVers=vVal.filter(v=>new Date(v.date)>=mStart);
-  const totDay=tdVers.reduce((s,v)=>s+(v.montant||0),0);
-  const totMon=mVers.reduce((s,v)=>s+(v.montant||0),0);
-  const totDeps=deps.reduce((s,d)=>s+(d.montant||0),0);
-  const alerts=getDocAlerts();
-  const isSA=CU.role==='superadmin';
+// =============================================
+function kpi(ico,color,label,val,sub){return`<div class="kpi ${color}"><div class="kpi-ico ${color}">${ico}</div><div class="kpi-val">${val}</div><div class="kpi-label">${label}</div><div class="kpi-sub">${sub}</div></div>`;}
 
+function renderDash(){
+  const vers=myVers(),vehs=myVehs(),conds=myConds(),deps=myDeps();
+  const td=new Date(),tdStr=td.toDateString(),mStart=new Date(td.getFullYear(),td.getMonth(),1);
+  const vVal=vers.filter(v=>v.statut==='valide');
+  const tdV=vVal.filter(v=>new Date(v.date).toDateString()===tdStr);
+  const mV=vVal.filter(v=>new Date(v.date)>=mStart);
+  const totDay=tdV.reduce((s,v)=>s+(v.montant||0),0);
+  const totMon=mV.reduce((s,v)=>s+(v.montant||0),0);
+  const totDeps=deps.reduce((s,d)=>s+(d.montant||0),0);
+  const isSA=CU.role==='superadmin';
   let html=`<div class="kpi-grid">`;
   if(isSA){
-    const actV=vehs.filter(v=>v.statut==='actif').length;
-    html+=kpi('💰','gr','Total versé (mois)',fm(totMon),`${mVers.length} versements validés`);
-    html+=kpi('📅','bl','Aujourd\'hui',fm(totDay),`${tdVers.length} versements`);
-    html+=kpi('🚗','vi','Véhicules actifs',actV,`/ ${vehs.length} total`);
-    html+=kpi('👥','or','Propriétaires',props.length,`${props.length} enregistrés`);
+    html+=kpi('💰','gr','Total versé (mois)',fm(totMon),`${mV.length} versements validés`);
+    html+=kpi('📅','bl',"Aujourd'hui",fm(totDay),`${tdV.length} versements`);
+    html+=kpi('🚗','vi','Véhicules actifs',vehs.filter(v=>v.statut==='actif').length,`/ ${vehs.length} total`);
+    html+=kpi('👥','or','Propriétaires',C.proprietaires.length,'enregistrés');
     html+=kpi('💸','ye','Dépenses totales',fm(totDeps),`${deps.length} enregistrées`);
-    html+=kpi('⚠️','rd','Alertes docs',alerts.length,'Documents à vérifier');
+    html+=kpi('⚠️','rd','Alertes docs',getDocAlerts().length,'Documents à vérifier');
   }else{
-    html+=kpi('💰','gr','Versé aujourd\'hui',fm(totDay),`${tdVers.length} versements`);
-    html+=kpi('📅','bl','Ce mois',fm(totMon),`${mVers.length} versements`);
+    html+=kpi('💰','gr',"Versé aujourd'hui",fm(totDay),`${tdV.length} versements`);
+    html+=kpi('📅','bl','Ce mois',fm(totMon),`${mV.length} versements`);
     html+=kpi('🚗','vi','Mes véhicules',vehs.length,`${vehs.filter(v=>v.statut==='actif').length} actifs`);
     html+=kpi('👤','or','Mes conducteurs',conds.length,`${conds.filter(c=>c.statut==='actif').length} actifs`);
-    const avg=mVers.length>0?Math.round(totMon/new Date().getDate()):0;
-    html+=kpi('📊','ye','Moy. jour. (mois)',fm(avg),'Ce mois en cours');
+    html+=kpi('📊','ye','Moy. jour. (mois)',fm(mV.length>0?Math.round(totMon/td.getDate()):0),'Ce mois');
     html+=kpi('💸','rd','Dépenses (mois)',fm(deps.filter(d=>new Date(d.date)>=mStart).reduce((s,d)=>s+(d.montant||0),0)),'Ce mois');
   }
   html+='</div>';
-
-  html+=`<div class="charts-grid">
-    <div class="ch-wrap"><div class="ch-title">📈 Évolution versements — 30 derniers jours</div><canvas id="chart-line" width="580" height="200"></canvas></div>
-    <div class="ch-wrap"><div class="ch-title">🍩 Statuts versements</div><canvas id="chart-pie" width="230" height="200"></canvas></div>
-  </div>`;
-
-  if(isSA){
-    html+=`<div class="charts-grid">
-      <div class="ch-wrap"><div class="ch-title">🏆 Top propriétaires</div><canvas id="chart-bar" width="580" height="200"></canvas></div>
-      <div class="ch-wrap"><div class="ch-title">🔔 Alertes récentes</div><div id="dash-alerts"></div></div>
-    </div>`;
-  }
-
-  // Recent versements
-  const recent=myVers().sort((a,b)=>new Date(b.created||b.date)-new Date(a.created||a.date)).slice(0,8);
-  html+=`<div class="tw"><div class="tw-hdr"><div class="tw-title">📋 Versements récents</div>
-    <button class="btn btn-s btn-sm" onclick="navTo('versements')">Voir tout →</button></div>
-    <table><thead><tr><th>Date</th><th>Véhicule</th><th>Conducteur</th><th>Montant</th><th>Statut</th></tr></thead><tbody>`;
-  if(recent.length===0) html+=`<tr><td colspan="5"><div class="empty-st" style="padding:30px"><div class="ei">💰</div><h3>Aucun versement</h3></div></td></tr>`;
-  for(const v of recent){
-    const vh=getVeh(v.veh_id);const cd=getCond(v.cond_id);
-    html+=`<tr><td>${fd(v.date)}</td><td><span style="font-family:var(--mono);color:var(--accent)">${vh?vh.immat:'—'}</span></td>
-    <td>${cd?cd.prenom+' '+cd.nom:'—'}</td>
-    <td style="font-weight:800;color:var(--green)">${fm(v.montant)}</td>
-    <td>${statusBadge(v.statut)}</td></tr>`;
-  }
+  html+=`<div class="charts-grid"><div class="ch-wrap"><div class="ch-title">📈 Versements — 30 derniers jours</div><canvas id="chart-line" width="580" height="200"></canvas></div><div class="ch-wrap"><div class="ch-title">🍩 Statuts</div><canvas id="chart-pie" width="230" height="200"></canvas></div></div>`;
+  const recent=[...myVers()].sort((a,b)=>new Date(b.created_at||b.date)-new Date(a.created_at||a.date)).slice(0,8);
+  html+=`<div class="tw"><div class="tw-hdr"><div class="tw-title">📋 Versements récents</div><button class="btn btn-s btn-sm" onclick="navTo('versements')">Voir tout →</button></div><table><thead><tr><th>Date</th><th>Véhicule</th><th>Conducteur</th><th>Montant</th><th>Statut</th></tr></thead><tbody>`;
+  if(!recent.length)html+=`<tr><td colspan="5"><div class="empty-st" style="padding:30px"><div class="ei">💰</div><h3>Aucun versement</h3></div></td></tr>`;
+  for(const v of recent){const vh=getVeh(v.veh_id);const cd=getCond(v.cond_id);html+=`<tr><td>${fd(v.date)}</td><td><span style="font-family:var(--mono);color:var(--accent)">${vh?vh.immat:'—'}</span></td><td>${cd?cd.prenom+' '+cd.nom:'—'}</td><td style="font-weight:800;color:var(--green)">${fm(v.montant)}</td><td>${statusBadge(v.statut)}</td></tr>`;}
   html+='</tbody></table></div>';
   $('content').innerHTML=html;
-  setTimeout(()=>{
-    drawLine(vers); drawPie(vers);
-    if(isSA){drawBar(DB.g('versements')||[],DB.g('proprietaires')||[]);renderDashAlerts();}
-  },80);
-}
-
-function kpi(ico,color,label,val,sub){
-  return`<div class="kpi ${color}"><div class="kpi-ico ${color}">${ico}</div>
-    <div class="kpi-val">${val}</div><div class="kpi-label">${label}</div><div class="kpi-sub">${sub}</div></div>`;
+  setTimeout(()=>{drawLine(vers);drawPie(vers);},80);
 }
 
 function drawLine(vers){
   const c=$('chart-line');if(!c)return;
   const ctx=c.getContext('2d');const W=c.width,H=c.height;ctx.clearRect(0,0,W,H);
   const N=30;const data=[];const td=new Date();
-  for(let i=N-1;i>=0;i--){
-    const d=new Date(td);d.setDate(d.getDate()-i);
-    const s=d.toDateString();
-    const t=vers.filter(v=>new Date(v.date).toDateString()===s&&v.statut==='valide').reduce((s,v)=>s+(v.montant||0),0);
-    data.push({l:d.getDate()+'/'+(d.getMonth()+1),v:t});
-  }
-  const mx=Math.max(...data.map(d=>d.v),1);
-  const pd={l:58,r:18,t:16,b:36};const gW=W-pd.l-pd.r,gH=H-pd.t-pd.b;
+  for(let i=N-1;i>=0;i--){const d=new Date(td);d.setDate(d.getDate()-i);const s=d.toDateString();const t=vers.filter(v=>new Date(v.date).toDateString()===s&&v.statut==='valide').reduce((s,v)=>s+(v.montant||0),0);data.push({l:d.getDate()+'/'+(d.getMonth()+1),v:t});}
+  const mx=Math.max(...data.map(d=>d.v),1);const pd={l:58,r:18,t:16,b:36};const gW=W-pd.l-pd.r,gH=H-pd.t-pd.b;
   ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;
-  for(let i=0;i<=4;i++){const y=pd.t+gH*(1-i/4);ctx.beginPath();ctx.moveTo(pd.l,y);ctx.lineTo(pd.l+gW,y);ctx.stroke();
-    ctx.fillStyle='rgba(148,163,184,.7)';ctx.font='10px sans-serif';ctx.textAlign='right';
-    ctx.fillText(fn(Math.round(mx*i/4/1000))+'k',pd.l-4,y+4);}
-  if(data.some(d=>d.v>0)){
-    ctx.beginPath();ctx.strokeStyle='#7c3aed';ctx.lineWidth=2.5;ctx.lineJoin='round';
-    data.forEach((d,i)=>{const x=pd.l+gW*i/(N-1);const y=pd.t+gH*(1-d.v/mx);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
-    ctx.stroke();
-    ctx.globalAlpha=.12;const grad=ctx.createLinearGradient(0,pd.t,0,pd.t+gH);
-    grad.addColorStop(0,'#7c3aed');grad.addColorStop(1,'transparent');ctx.fillStyle=grad;
-    ctx.beginPath();data.forEach((d,i)=>{const x=pd.l+gW*i/(N-1);const y=pd.t+gH*(1-d.v/mx);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
-    ctx.lineTo(pd.l+gW,pd.t+gH);ctx.lineTo(pd.l,pd.t+gH);ctx.closePath();ctx.fill();ctx.globalAlpha=1;
-  }else{ctx.fillStyle='rgba(148,163,184,.4)';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Aucune donnée',W/2,H/2);}
+  for(let i=0;i<=4;i++){const y=pd.t+gH*(1-i/4);ctx.beginPath();ctx.moveTo(pd.l,y);ctx.lineTo(pd.l+gW,y);ctx.stroke();ctx.fillStyle='rgba(148,163,184,.7)';ctx.font='10px sans-serif';ctx.textAlign='right';ctx.fillText(fn(Math.round(mx*i/4/1000))+'k',pd.l-4,y+4);}
+  if(data.some(d=>d.v>0)){ctx.beginPath();ctx.strokeStyle='#7c3aed';ctx.lineWidth=2.5;ctx.lineJoin='round';data.forEach((d,i)=>{const x=pd.l+gW*i/(N-1);const y=pd.t+gH*(1-d.v/mx);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();}
+  else{ctx.fillStyle='rgba(148,163,184,.4)';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Aucune donnée',W/2,H/2);}
   ctx.fillStyle='rgba(148,163,184,.7)';ctx.font='10px sans-serif';ctx.textAlign='center';
   data.forEach((d,i)=>{if(i%7===0){const x=pd.l+gW*i/(N-1);ctx.fillText(d.l,x,H-6);}});
 }
@@ -758,1273 +527,546 @@ function drawLine(vers){
 function drawPie(vers){
   const c=$('chart-pie');if(!c)return;
   const ctx=c.getContext('2d');const W=c.width,H=c.height;ctx.clearRect(0,0,W,H);
-  const v=vers.filter(x=>x.statut==='valide').length;
-  const a=vers.filter(x=>x.statut==='attente').length;
-  const l=vers.filter(x=>x.statut==='litige').length;
-  const tot=vers.length||1;
-  const data=[{l:'Validé',v,c:'#10b981'},{l:'Attente',v:a,c:'#f59e0b'},{l:'Litige',v:l,c:'#ef4444'}];
+  const v=vers.filter(x=>x.statut==='valide').length,a=vers.filter(x=>x.statut==='attente').length,l=vers.filter(x=>x.statut==='litige').length;
+  const tot=vers.length||1;const data=[{l:'Validé',v,c:'#10b981'},{l:'Attente',v:a,c:'#f59e0b'},{l:'Litige',v:l,c:'#ef4444'}];
   const cx=W/2,cy=H/2-8,r=72;let ang=-Math.PI/2;
-  for(const d of data){
-    const sl=2*Math.PI*d.v/tot;
-    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,ang+sl);ctx.closePath();
-    ctx.fillStyle=d.c;ctx.fill();ang+=sl;
-  }
+  for(const d of data){const sl=2*Math.PI*d.v/tot;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,ang+sl);ctx.closePath();ctx.fillStyle=d.c;ctx.fill();ang+=sl;}
   ctx.beginPath();ctx.arc(cx,cy,44,0,2*Math.PI);ctx.fillStyle=isDark?'#0d2040':'#fff';ctx.fill();
   ctx.fillStyle=isDark?'#e2e8f0':'#1e293b';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(vers.length,cx,cy+5);
-  data.forEach((d,i)=>{const ly=H-32+(i-1)*12;ctx.fillStyle=d.c;ctx.fillRect(10,ly,8,8);
-    ctx.fillStyle='rgba(148,163,184,.85)';ctx.font='10px sans-serif';ctx.textAlign='left';ctx.fillText(`${d.l}: ${d.v}`,22,ly+8);});
+  data.forEach((d,i)=>{const ly=H-32+(i-1)*12;ctx.fillStyle=d.c;ctx.fillRect(10,ly,8,8);ctx.fillStyle='rgba(148,163,184,.85)';ctx.font='10px sans-serif';ctx.textAlign='left';ctx.fillText(`${d.l}: ${d.v}`,22,ly+8);});
 }
 
-function drawBar(vers,props){
-  const c=$('chart-bar');if(!c)return;
-  const ctx=c.getContext('2d');const W=c.width,H=c.height;ctx.clearRect(0,0,W,H);
-  const data=props.map(p=>{
-    const u=getUser(p.uid)||{};
-    const t=vers.filter(v=>v.prop_id===p.uid&&v.statut==='valide').reduce((s,v)=>s+(v.montant||0),0);
-    return{l:(u.prenom||'?')+' '+(u.nom||'').charAt(0)+'.',v:t};
-  }).sort((a,b)=>b.v-a.v).slice(0,8);
-  if(!data.length){ctx.fillStyle='rgba(148,163,184,.4)';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Aucune donnée',W/2,H/2);return;}
-  const mx=Math.max(...data.map(d=>d.v),1);
-  const pd={l:56,r:16,t:16,b:44};const gW=W-pd.l-pd.r,gH=H-pd.t-pd.b;
-  const bw=Math.min(gW/data.length-10,52);
-  ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;
-  for(let i=0;i<=4;i++){const y=pd.t+gH*(1-i/4);ctx.beginPath();ctx.moveTo(pd.l,y);ctx.lineTo(pd.l+gW,y);ctx.stroke();
-    ctx.fillStyle='rgba(148,163,184,.7)';ctx.font='10px sans-serif';ctx.textAlign='right';
-    ctx.fillText(fn(Math.round(mx*i/4/1000))+'k',pd.l-3,y+4);}
-  data.forEach((d,i)=>{
-    const bh=gH*d.v/mx;const x=pd.l+gW*i/data.length+(gW/data.length-bw)/2;const y=pd.t+gH-bh;
-    const g=ctx.createLinearGradient(0,y,0,y+bh);g.addColorStop(0,'#7c3aed');g.addColorStop(1,'#a78bfa');
-    ctx.fillStyle=g;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,bw,bh,3);else ctx.rect(x,y,bw,bh);ctx.fill();
-    ctx.fillStyle='rgba(148,163,184,.8)';ctx.font='10px sans-serif';ctx.textAlign='center';
-    ctx.fillText(d.l,x+bw/2,pd.t+gH+16);
-  });
-}
-
-function renderDashAlerts(){
-  const el=$('dash-alerts');if(!el)return;
-  const al=getDocAlerts();
-  if(!al.length){el.innerHTML='<div class="empty-st" style="padding:20px"><div class="ei">✅</div><p>Aucune alerte</p></div>';return;}
-  const cols={r:'al-r',y:'al-y',b:'al-b'};const icos={r:'🔴',y:'🟡',b:'🔵'};
-  el.innerHTML=al.slice(0,5).map(a=>`<div class="alert ${cols[a.t]}"><span>${icos[a.t]}</span><span>${a.msg}</span></div>`).join('');
-}
-
-// ============================================================
+// =============================================
 // PROPRIÉTAIRES
-// ============================================================
+// =============================================
 function renderProps(){
-  const props=DB.g('proprietaires')||[];
-  let html=`<div class="pg-hdr"><div><div class="pg-title">Propriétaires</div><div class="pg-sub">${props.length} propriétaire(s)</div></div></div>
-  <div class="filters">
-    <div class="srch"><span class="srch-ico">🔍</span><input id="srch-p" placeholder="Rechercher..." oninput="filterProps()"/></div>
-    <select class="fsel" id="fp-st" onchange="filterProps()"><option value="">Tous</option><option value="actif">Actifs</option><option value="suspendu">Suspendus</option></select>
-  </div>
+  const props=C.proprietaires;
+  $('content').innerHTML=`<div class="pg-hdr"><div><div class="pg-title">Propriétaires</div><div class="pg-sub">${props.length} propriétaire(s)</div></div></div>
+  <div class="filters"><div class="srch"><span class="srch-ico">🔍</span><input id="srch-p" placeholder="Rechercher..." oninput="filterProps()"/></div></div>
   <div class="tw" id="props-tw">${propsTable(props)}</div>`;
-  $('content').innerHTML=html;
 }
-
 function propsTable(props){
-  if(!props.length) return`<div class="empty-st" style="padding:50px"><div class="ei">👥</div><h3>Aucun propriétaire</h3><p>Créez le premier propriétaire</p></div>`;
-  const vers=DB.g('versements')||[];const vehs=DB.g('vehicules')||[];
+  if(!props.length)return`<div class="empty-st" style="padding:50px"><div class="ei">👥</div><h3>Aucun propriétaire</h3></div>`;
   let html=`<table><thead><tr><th>Logo</th><th>Propriétaire</th><th>Téléphone</th><th>Email</th><th>Véhicules</th><th>Total versé</th><th>Statut</th><th>Actions</th></tr></thead><tbody>`;
   for(const p of props){
     const u=getUser(p.uid)||{};
-    const nbV=vehs.filter(v=>v.prop_id===p.uid).length;
-    const tot=vers.filter(v=>v.prop_id===p.uid&&v.statut==='valide').reduce((s,v)=>s+(v.montant||0),0);
+    const nbV=C.vehicules.filter(v=>v.prop_id===p.uid).length;
+    const tot=C.versements.filter(v=>v.prop_id===p.uid&&v.statut==='valide').reduce((s,v)=>s+(v.montant||0),0);
     const actif=u.actif!==false;
-    html+=`<tr>
-      <td>${av(u.nom,u.prenom,avc(u.email||u.id),'sm',u.logo)}</td>
-      <td><div style="font-weight:700">${u.prenom||'?'} ${u.nom||''}</div><div style="font-size:10px;color:var(--text3)">${p.adresse||'—'}</div></td>
-      <td>${p.tel||'—'}</td>
-      <td style="color:var(--accent);font-size:11px">${u.email||'—'}</td>
-      <td>${nbV}</td>
-      <td style="font-weight:800;color:var(--green)">${fm(tot)}</td>
-      <td>${actif?'<span class="b b-gr">Actif</span>':'<span class="b b-rd">Suspendu</span>'}</td>
-      <td><div style="display:flex;gap:4px;flex-wrap:wrap">
-        <button class="btn btn-s btn-xs" onclick="viewProp('${p.id}')">👁️</button>
-        <button class="btn btn-s btn-xs" onclick="editProp('${p.id}')">✏️</button>
-        <button class="btn btn-s btn-xs" onclick="editPropLogo('${p.id}')">🖼️</button>
-        <button class="btn btn-${actif?'d':'ok'} btn-xs" onclick="toggleProp('${p.id}')">${actif?'Suspendre':'Activer'}</button>
-      </div></td>
-    </tr>`;
+    html+=`<tr><td>${avEl(u.nom,u.prenom,avc(u.email||''),'sm',u.logo)}</td><td><div style="font-weight:700">${u.prenom||'?'} ${u.nom||''}</div><div style="font-size:10px;color:var(--text3)">${p.adresse||'—'}</div></td><td>${p.tel||'—'}</td><td style="color:var(--accent);font-size:11px">${u.email||'—'}</td><td>${nbV}</td><td style="font-weight:800;color:var(--green)">${fm(tot)}</td><td>${actif?'<span class="b b-gr">Actif</span>':'<span class="b b-rd">Suspendu</span>'}</td>
+    <td><div style="display:flex;gap:4px"><button class="btn btn-s btn-xs" onclick="editProp('${p.id}')">✏️</button><button class="btn btn-${actif?'d':'ok'} btn-xs" onclick="toggleProp('${p.id}')">${actif?'Suspendre':'Activer'}</button></div></td></tr>`;
   }
   return html+'</tbody></table>';
 }
-
-function filterProps(){
-  const q=gv('srch-p').toLowerCase();const st=$('fp-st')?.value||'';
-  let props=DB.g('proprietaires')||[];
-  props=props.filter(p=>{
-    const u=getUser(p.uid)||{};
-    const ok=!q||(u.nom||'').toLowerCase().includes(q)||(u.prenom||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q);
-    const s=!st||(st==='actif'?u.actif!==false:u.actif===false);
-    return ok&&s;
-  });
-  $('props-tw').innerHTML=propsTable(props);
-}
+function filterProps(){const q=gv('srch-p').toLowerCase();$('props-tw').innerHTML=propsTable(C.proprietaires.filter(p=>{const u=getUser(p.uid)||{};return!q||(u.nom||'').toLowerCase().includes(q)||(u.prenom||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q);}));}
 
 window.openAddProp=function(){
   openModal(`<div class="mh"><div class="mh-title">➕ Nouveau propriétaire</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb">
-    <div class="alert al-b" style="margin-bottom:14px"><span>ℹ️</span> Un compte utilisateur sera créé automatiquement.</div>
-    <div style="text-align:center;margin-bottom:16px">
-      <div id="logo-prev-wrap" style="display:flex;align-items:center;justify-content:center;gap:12px;flex-direction:column">
-        <div id="ap-logo-prev" style="width:72px;height:72px;border-radius:50%;background:var(--bg3);border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden">👤</div>
-        <label class="btn btn-s btn-sm" style="cursor:pointer">📷 Choisir logo <input type="file" accept="image/*" style="display:none" onchange="previewLogo(this,'ap-logo-prev')"></label>
-      </div>
-    </div>
-    <div class="fg">
-      <div class="fgrp"><label>Prénom *</label><input id="ap-prenom" placeholder="Prénom"/></div>
-      <div class="fgrp"><label>Nom *</label><input id="ap-nom" placeholder="Nom"/></div>
-      <div class="fgrp"><label>Email *</label><input type="email" id="ap-email" placeholder="email@exemple.com"/></div>
-      <div class="fgrp"><label>Téléphone *</label><input id="ap-tel" placeholder="+221 77..."/></div>
-      <div class="fgrp fg1"><label>Adresse</label><input id="ap-adr" placeholder="Adresse complète"/></div>
-      <div class="fgrp"><label>Mot de passe *</label><input type="password" id="ap-pwd" placeholder="Min 8 car."/></div>
-      <div class="fgrp"><label>Confirmer MDP *</label><input type="password" id="ap-pwd2" placeholder="Répéter"/></div>
-    </div>
-    <div id="ap-err" class="err-msg"></div>
-  </div>
-  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="saveProp()">Créer le propriétaire</button></div>`);
-}
+  <div class="mb"><div class="alert al-b" style="margin-bottom:14px"><span>ℹ️</span> Un compte Supabase Auth sera créé automatiquement.</div>
+  <div class="fg">
+    <div class="fgrp"><label>Prénom *</label><input id="ap-prenom" placeholder="Prénom"/></div>
+    <div class="fgrp"><label>Nom *</label><input id="ap-nom" placeholder="Nom"/></div>
+    <div class="fgrp"><label>Email *</label><input type="email" id="ap-email" placeholder="email@exemple.com"/></div>
+    <div class="fgrp"><label>Téléphone</label><input id="ap-tel" placeholder="+221 77..."/></div>
+    <div class="fgrp fg1"><label>Adresse</label><input id="ap-adr" placeholder="Adresse"/></div>
+    <div class="fgrp"><label>Mot de passe *</label><input type="password" id="ap-pwd" placeholder="Min 8 car."/></div>
+    <div class="fgrp"><label>Confirmer *</label><input type="password" id="ap-pwd2" placeholder="Répéter"/></div>
+  </div><div id="ap-err" class="err-msg"></div></div>
+  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="saveProp()">Créer</button></div>`);
+};
 
-async function previewLogo(input,previewId){
-  if(!input.files[0]) return;
-  try{
-    const data=await readFileAsDataURL(input.files[0]);
-    const el=$(previewId);
-    el.innerHTML=`<img src="${data}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-    el.dataset.logoData=data;
-  }catch(e){console.warn('logo preview',e);}
-}
-
-function saveProp(){
+async function saveProp(){
   const prenom=gv('ap-prenom'),nom=gv('ap-nom'),email=gv('ap-email'),tel=gv('ap-tel'),adr=gv('ap-adr'),pwd=gvr('ap-pwd'),pwd2=gvr('ap-pwd2');
   const err=$('ap-err');err.style.display='none';
-  if(!prenom||!nom||!email||!tel||!pwd){err.textContent='Champs obligatoires manquants';err.style.display='block';return;}
+  if(!prenom||!nom||!email||!pwd){err.textContent='Champs obligatoires manquants';err.style.display='block';return;}
   if(pwd!==pwd2){err.textContent='Mots de passe différents';err.style.display='block';return;}
-  if(pwd.length<8){err.textContent='Mot de passe trop court (min 8)';err.style.display='block';return;}
-  const users=DB.g('users')||[];
-  if(users.find(u=>u.email.toLowerCase()===email.toLowerCase())){err.textContent='Email déjà utilisé';err.style.display='block';return;}
-  const logoEl=$('ap-logo-prev');const logoData=logoEl?.dataset?.logoData||null;
+  if(pwd.length<8){err.textContent='Mot de passe trop court';err.style.display='block';return;}
+  const{data:sd,error:se}=await sb.auth.signUp({email,password:pwd});
+  if(se){err.textContent='Erreur: '+se.message;err.style.display='block';return;}
   const nid=uid();
-  users.push({id:nid,nom,prenom,email,pwd:hpwd(pwd),role:'proprietaire',actif:true,created:now(),tel,adresse:adr,logo:logoData});
-  DB.s('users',users);
-  const props=DB.g('proprietaires')||[];
-  props.push({id:uid(),uid:nid,tel,adresse:adr,created:now()});
-  DB.s('proprietaires',props);
-  log('Création propriétaire',prenom+' '+nom);
+  await dbIns('users',{id:nid,auth_id:sd.user?.id||null,nom,prenom,email,role:'proprietaire',actif:true,created_at:now(),tel,adresse:adr,logo:null});
+  await dbIns('proprietaires',{id:uid(),uid:nid,tel,adresse:adr,created_at:now()});
+  await addLog('Création propriétaire',prenom+' '+nom);
   closeModal();renderProps();
 }
 
-function viewProp(pid){
-  const props=DB.g('proprietaires')||[];const p=props.find(x=>x.id===pid);if(!p)return;
-  const u=getUser(p.uid)||{};
-  const vers=DB.g('versements')||[];const vehs=DB.g('vehicules')||[];const conds=DB.g('conducteurs')||[];
-  const nbV=vehs.filter(v=>v.prop_id===p.uid).length;const nbC=conds.filter(c=>c.prop_id===p.uid).length;
-  const myV=vers.filter(v=>v.prop_id===p.uid&&v.statut==='valide');
-  const tot=myV.reduce((s,v)=>s+(v.montant||0),0);
-  const mS=new Date(new Date().getFullYear(),new Date().getMonth(),1);
-  const mTot=myV.filter(v=>new Date(v.date)>=mS).reduce((s,v)=>s+(v.montant||0),0);
-  openModal(`<div class="mh">
-    <div style="display:flex;align-items:center;gap:12px">
-      ${av(u.nom,u.prenom,avc(u.email||u.id),'md',u.logo)}
-      <div><div class="mh-title">${u.prenom||'?'} ${u.nom||''}</div><div style="font-size:11px;color:var(--text3)">${u.email}</div></div>
-    </div>
-    <div class="x-btn" onclick="closeModal()">✕</div>
-  </div>
-  <div class="mb">
-    <div class="chg">
-      <div class="kpi bl" style="padding:14px"><div class="kpi-val" style="font-size:20px">${nbV}</div><div class="kpi-label">Véhicules</div></div>
-      <div class="kpi gr" style="padding:14px"><div class="kpi-val" style="font-size:16px">${fm(mTot)}</div><div class="kpi-label">Ce mois</div></div>
-      <div class="kpi vi" style="padding:14px"><div class="kpi-val" style="font-size:16px">${fm(tot)}</div><div class="kpi-label">Total versé</div></div>
-    </div>
-    <div class="dr"><span class="dl">Téléphone</span><span class="dv">${p.tel||'—'}</span></div>
-    <div class="dr"><span class="dl">Adresse</span><span class="dv">${p.adresse||'—'}</span></div>
-    <div class="dr"><span class="dl">Conducteurs</span><span class="dv">${nbC}</span></div>
-    <div class="dr"><span class="dl">Statut</span><span class="dv">${u.actif!==false?'<span class="b b-gr">Actif</span>':'<span class="b b-rd">Suspendu</span>'}</span></div>
-    <div class="dr"><span class="dl">Créé le</span><span class="dv">${fd(u.created)}</span></div>
-  </div>
-  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Fermer</button><button class="btn btn-p" onclick="closeModal();editProp('${pid}')">✏️ Modifier</button></div>`);
-}
-
 function editProp(pid){
-  const props=DB.g('proprietaires')||[];const p=props.find(x=>x.id===pid);if(!p)return;
+  const p=C.proprietaires.find(x=>x.id===pid);if(!p)return;
   const u=getUser(p.uid)||{};
   openModal(`<div class="mh"><div class="mh-title">✏️ Modifier propriétaire</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb">
-    <div class="fg">
-      <div class="fgrp"><label>Prénom</label><input id="ep-prenom" value="${u.prenom||''}"/></div>
-      <div class="fgrp"><label>Nom</label><input id="ep-nom" value="${u.nom||''}"/></div>
-      <div class="fgrp"><label>Email</label><input type="email" id="ep-email" value="${u.email||''}"/></div>
-      <div class="fgrp"><label>Téléphone</label><input id="ep-tel" value="${p.tel||''}"/></div>
-      <div class="fgrp fg1"><label>Adresse</label><input id="ep-adr" value="${p.adresse||''}"/></div>
-    </div>
-  </div>
+  <div class="mb"><div class="fg">
+    <div class="fgrp"><label>Prénom</label><input id="ep-prenom" value="${u.prenom||''}"/></div>
+    <div class="fgrp"><label>Nom</label><input id="ep-nom" value="${u.nom||''}"/></div>
+    <div class="fgrp"><label>Email</label><input type="email" id="ep-email" value="${u.email||''}"/></div>
+    <div class="fgrp"><label>Téléphone</label><input id="ep-tel" value="${p.tel||''}"/></div>
+    <div class="fgrp fg1"><label>Adresse</label><input id="ep-adr" value="${p.adresse||''}"/></div>
+  </div></div>
   <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="updateProp('${pid}')">Enregistrer</button></div>`);
 }
-
-function updateProp(pid){
-  const props=DB.g('proprietaires')||[];const p=props.find(x=>x.id===pid);if(!p)return;
-  const users=DB.g('users')||[];const u=users.find(x=>x.id===p.uid);if(!u)return;
-  u.prenom=gv('ep-prenom');u.nom=gv('ep-nom');u.email=gv('ep-email');
-  p.tel=gv('ep-tel');p.adresse=gv('ep-adr');u.tel=p.tel;u.adresse=p.adresse;
-  DB.s('users',users);DB.s('proprietaires',props);
-  log('Modif propriétaire',u.prenom+' '+u.nom);closeModal();renderProps();
+async function updateProp(pid){
+  const p=C.proprietaires.find(x=>x.id===pid);if(!p)return;
+  await dbUpd('users',p.uid,{prenom:gv('ep-prenom'),nom:gv('ep-nom'),email:gv('ep-email'),tel:gv('ep-tel'),adresse:gv('ep-adr')});
+  await dbUpd('proprietaires',pid,{tel:gv('ep-tel'),adresse:gv('ep-adr')});
+  await addLog('Modif propriétaire',gv('ep-prenom')+' '+gv('ep-nom'));
+  closeModal();renderProps();
+}
+async function toggleProp(pid){
+  const p=C.proprietaires.find(x=>x.id===pid);if(!p)return;
+  const u=getUser(p.uid);if(!u)return;
+  await dbUpd('users',p.uid,{actif:!u.actif});
+  await addLog((u.actif?'Suspension':'Activation')+' propriétaire',u.prenom+' '+u.nom);
+  renderProps();
 }
 
-function editPropLogo(pid){
-  const props=DB.g('proprietaires')||[];const p=props.find(x=>x.id===pid);if(!p)return;
-  const u=getUser(p.uid)||{};
-  openModal(`<div class="mh"><div class="mh-title">🖼️ Logo / Photo — ${u.prenom} ${u.nom}</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb" style="text-align:center">
-    <div id="logo-prev-edit" style="width:100px;height:100px;border-radius:50%;background:var(--bg3);border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:36px;overflow:hidden;margin:0 auto 16px">
-      ${u.logo?`<img src="${u.logo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:'👤'}
-    </div>
-    <div class="uplz" style="max-width:320px;margin:0 auto">
-      <input type="file" accept="image/*" onchange="previewLogoEdit(this,'logo-prev-edit')">
-      <div class="uplz-ico">📷</div>
-      <div class="uplz-txt">Cliquez ou glissez une image<br>JPG, PNG, WebP (max 2Mo)</div>
-    </div>
-    ${u.logo?`<button class="btn btn-d btn-sm" style="margin-top:12px" onclick="removePropLogo('${pid}')">🗑️ Supprimer le logo</button>`:''}
-  </div>
-  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="savePropLogo('${pid}')">Enregistrer</button></div>`);
-}
-
-async function previewLogoEdit(input,previewId){
-  if(!input.files[0])return;
-  if(input.files[0].size>3*1024*1024){alert('Image trop lourde (max 3Mo)');return;}
-  const data=await readFileAsDataURL(input.files[0]);
-  const el=$(previewId);el.innerHTML=`<img src="${data}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-  el.dataset.logoData=data;
-}
-
-function savePropLogo(pid){
-  const el=$('logo-prev-edit');
-  const logoData=el?.dataset?.logoData;
-  if(!logoData){closeModal();return;}
-  const users=DB.g('users')||[];
-  const props=DB.g('proprietaires')||[];const p=props.find(x=>x.id===pid);
-  if(!p)return;const u=users.find(x=>x.id===p.uid);if(!u)return;
-  u.logo=logoData;DB.s('users',users);
-  log('Mise à jour logo propriétaire',u.prenom+' '+u.nom);closeModal();renderProps();
-}
-
-function removePropLogo(pid){
-  const props=DB.g('proprietaires')||[];const p=props.find(x=>x.id===pid);if(!p)return;
-  const users=DB.g('users')||[];const u=users.find(x=>x.id===p.uid);if(!u)return;
-  u.logo=null;DB.s('users',users);closeModal();renderProps();
-}
-
-function toggleProp(pid){
-  const props=DB.g('proprietaires')||[];const p=props.find(x=>x.id===pid);if(!p)return;
-  const users=DB.g('users')||[];const u=users.find(x=>x.id===p.uid);if(!u)return;
-  u.actif=!u.actif;DB.s('users',users);log((u.actif?'Activation':'Suspension')+' propriétaire',u.prenom+' '+u.nom);renderProps();
-}
-
-// ============================================================
+// =============================================
 // VÉHICULES
-// ============================================================
+// =============================================
 function renderVehs(){
   const vehs=myVehs();
-  let html=`<div class="pg-hdr"><div><div class="pg-title">Véhicules</div><div class="pg-sub">${vehs.length} véhicule(s)</div></div></div>
-  <div class="filters">
-    <div class="srch"><span class="srch-ico">🔍</span><input id="srch-v" placeholder="Immatriculation, marque..." oninput="filterVehs()"/></div>
-    <select class="fsel" id="fv-st" onchange="filterVehs()"><option value="">Tous statuts</option>${STATUTS_V.map(s=>`<option value="${s}">${SL_VL[s]}</option>`).join('')}</select>
-    <select class="fsel" id="fv-ty" onchange="filterVehs()"><option value="">Tous types</option>${TYPES_V.map(t=>`<option value="${t}">${t}</option>`).join('')}</select>
-  </div>
+  $('content').innerHTML=`<div class="pg-hdr"><div><div class="pg-title">Véhicules</div><div class="pg-sub">${vehs.length} véhicule(s)</div></div></div>
+  <div class="filters"><div class="srch"><span class="srch-ico">🔍</span><input id="srch-v" placeholder="Immatriculation, marque..." oninput="filterVehs()"/></div>
+  <select class="fsel" id="fv-st" onchange="filterVehs()"><option value="">Tous statuts</option>${STATUTS_V.map(s=>`<option value="${s}">${SL_VL[s]}</option>`).join('')}</select></div>
   <div class="tw" id="vehs-tw">${vehsTable(vehs)}</div>`;
-  $('content').innerHTML=html;
 }
-
 function vehsTable(vehs){
-  if(!vehs.length) return`<div class="empty-st" style="padding:50px"><div class="ei">🚗</div><h3>Aucun véhicule</h3><p>Ajoutez le premier véhicule</p></div>`;
-  const affs=DB.g('affectations')||[];const isSA=CU.role==='superadmin';
-  let html=`<table><thead><tr><th>Immatriculation</th><th>Marque/Modèle</th><th>Type</th><th>Année</th>
-    ${isSA?'<th>Propriétaire</th>':''}<th>Conducteurs</th><th>Statut</th><th>Actions</th></tr></thead><tbody>`;
+  if(!vehs.length)return`<div class="empty-st" style="padding:50px"><div class="ei">🚗</div><h3>Aucun véhicule</h3></div>`;
+  const isSA=CU.role==='superadmin';
+  let html=`<table><thead><tr><th>Immatriculation</th><th>Marque/Modèle</th><th>Type</th><th>Année</th>${isSA?'<th>Propriétaire</th>':''}<th>Statut</th><th>Actions</th></tr></thead><tbody>`;
   for(const v of vehs){
     const cu=isSA?getUser(v.prop_id):null;
-    const nbC=affs.filter(a=>a.veh_id===v.id&&a.actif).length;
-    html+=`<tr>
-      <td><span style="font-family:var(--mono);font-weight:700;color:var(--accent)">${v.immat||'—'}</span></td>
-      <td><div style="font-weight:700">${v.marque||'—'}</div><div style="font-size:10px;color:var(--text3)">${v.modele||'—'}</div></td>
-      <td style="font-size:11px">${v.type||'—'}</td>
-      <td>${v.annee||'—'}</td>
-      ${isSA?`<td style="font-size:11px">${cu?cu.prenom+' '+cu.nom:'—'}</td>`:''}
-      <td>${nbC} cond.</td>
-      <td>${vehStatusBadge(v.statut)}</td>
-      <td><div style="display:flex;gap:4px">
-        <button class="btn-ico btn-xs" onclick="viewVeh('${v.id}')">👁️</button>
-        <button class="btn-ico btn-xs" onclick="editVeh('${v.id}')">✏️</button>
-        ${CU.role==='superadmin'?`<button class="btn-ico btn-xs" onclick="delVeh('${v.id}')">🗑️</button>`:''}
-      </div></td>
-    </tr>`;
+    html+=`<tr><td><span style="font-family:var(--mono);font-weight:700;color:var(--accent)">${v.immat||'—'}</span></td><td><div style="font-weight:700">${v.marque||'—'}</div><div style="font-size:10px;color:var(--text3)">${v.modele||'—'}</div></td><td style="font-size:11px">${v.type||'—'}</td><td>${v.annee||'—'}</td>${isSA?`<td style="font-size:11px">${cu?cu.prenom+' '+cu.nom:'—'}</td>`:''}<td>${vehBadge(v.statut)}</td>
+    <td><div style="display:flex;gap:4px"><button class="btn-ico btn-xs" onclick="editVeh('${v.id}')">✏️</button>${CU.role==='superadmin'?`<button class="btn-ico btn-xs" onclick="delVeh('${v.id}')">🗑️</button>`:''}</div></td></tr>`;
   }
   return html+'</tbody></table>';
 }
-
-function filterVehs(){
-  const q=gv('srch-v').toLowerCase();const st=$('fv-st')?.value||'';const ty=$('fv-ty')?.value||'';
-  const vehs=myVehs().filter(v=>{
-    const ok=!q||v.immat.toLowerCase().includes(q)||v.marque.toLowerCase().includes(q)||(v.modele||'').toLowerCase().includes(q);
-    return ok&&(!st||v.statut===st)&&(!ty||v.type===ty);
-  });
-  $('vehs-tw').innerHTML=vehsTable(vehs);
-}
+function filterVehs(){const q=gv('srch-v').toLowerCase();const st=$('fv-st')?.value||'';$('vehs-tw').innerHTML=vehsTable(myVehs().filter(v=>{const ok=!q||v.immat.toLowerCase().includes(q)||v.marque.toLowerCase().includes(q);return ok&&(!st||v.statut===st);}));}
 
 window.openAddVeh=function(){
-  const isSA=CU.role==='superadmin';
+  const isSA=CU.role==='superadmin';const mV=myVehs();
   openModal(`<div class="mh"><div class="mh-title">🚗 Nouveau véhicule</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb">
-    ${isSA?`<div class="fgrp fg1"><label>Propriétaire *</label><select id="av-prop"><option value="">Choisir...</option>${propsSelect()}</select></div>`:''}
-    <div class="fg">
-      <div class="fgrp"><label>Immatriculation *</label><input id="av-immat" placeholder="DK-1234-AB"/></div>
-      <div class="fgrp"><label>Marque *</label><select id="av-marque"><option value="">Choisir...</option>${MARQUES.map(m=>`<option>${m}</option>`).join('')}</select></div>
-      <div class="fgrp"><label>Modèle</label><input id="av-modele" placeholder="Ex: Corolla"/></div>
-      <div class="fgrp"><label>Année</label><input type="number" id="av-annee" min="1960" max="2030" placeholder="${new Date().getFullYear()}"/></div>
-      <div class="fgrp"><label>Type *</label><select id="av-type"><option value="">Choisir...</option>${TYPES_V.map(t=>`<option>${t}</option>`).join('')}</select></div>
-      <div class="fgrp"><label>Statut</label><select id="av-statut"><option value="actif">Actif</option>${STATUTS_V.slice(1).map(s=>`<option value="${s}">${SL_VL[s]}</option>`).join('')}</select></div>
-      <div class="fgrp fg1"><label>Couleur</label><input id="av-couleur" placeholder="Blanc, Noir..."/></div>
-    </div>
-    <div id="av-err" class="err-msg"></div>
-  </div>
+  <div class="mb">${isSA?`<div class="fgrp fg1"><label>Propriétaire *</label><select id="av-prop"><option value="">Choisir...</option>${propsSelect()}</select></div>`:''}
+  <div class="fg">
+    <div class="fgrp"><label>Immatriculation *</label><input id="av-immat" placeholder="DK-1234-AB"/></div>
+    <div class="fgrp"><label>Marque *</label><select id="av-marque"><option value="">Choisir...</option>${MARQUES.map(m=>`<option>${m}</option>`).join('')}</select></div>
+    <div class="fgrp"><label>Modèle</label><input id="av-modele" placeholder="Ex: Corolla"/></div>
+    <div class="fgrp"><label>Année</label><input type="number" id="av-annee" min="1960" max="2030" placeholder="${new Date().getFullYear()}"/></div>
+    <div class="fgrp"><label>Type *</label><select id="av-type"><option value="">Choisir...</option>${TYPES_V.map(t=>`<option>${t}</option>`).join('')}</select></div>
+    <div class="fgrp"><label>Statut</label><select id="av-statut">${STATUTS_V.map(s=>`<option value="${s}">${SL_VL[s]}</option>`).join('')}</select></div>
+    <div class="fgrp fg1"><label>Couleur</label><input id="av-couleur" placeholder="Blanc, Noir..."/></div>
+  </div><div id="av-err" class="err-msg"></div></div>
   <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="saveVeh()">Créer</button></div>`);
-}
-
-function saveVeh(){
+};
+async function saveVeh(){
   const immat=gv('av-immat').toUpperCase(),marque=gv('av-marque'),type=gv('av-type');
   const err=$('av-err');err.style.display='none';
   if(!immat||!marque||!type){err.textContent='Champs obligatoires manquants';err.style.display='block';return;}
   let pid=getPropId();
   if(CU.role==='superadmin'){pid=gv('av-prop');if(!pid){err.textContent='Sélectionnez un propriétaire';err.style.display='block';return;}}
-  const vehs=DB.g('vehicules')||[];
-  if(vehs.find(v=>v.immat===immat)){err.textContent='Immatriculation déjà existante';err.style.display='block';return;}
-  vehs.push({id:uid(),prop_id:pid,immat,marque,modele:gv('av-modele'),annee:gv('av-annee'),type,statut:gv('av-statut')||'actif',couleur:gv('av-couleur'),created:now()});
-  DB.s('vehicules',vehs);log('Ajout véhicule',immat);closeModal();renderVehs();
+  if(C.vehicules.find(v=>v.immat===immat)){err.textContent='Immatriculation déjà existante';err.style.display='block';return;}
+  await dbIns('vehicules',{id:uid(),prop_id:pid,immat,marque,modele:gv('av-modele'),annee:gv('av-annee'),type,statut:gv('av-statut')||'actif',couleur:gv('av-couleur'),created_at:now()});
+  await addLog('Ajout véhicule',immat);closeModal();renderVehs();
 }
-
-function viewVeh(vid){
-  const vehs=DB.g('vehicules')||[];const v=vehs.find(x=>x.id===vid);if(!v)return;
-  const affs=DB.g('affectations')||[];const conds=DB.g('conducteurs')||[];
-  const vers=DB.g('versements')||[];
-  const actC=affs.filter(a=>a.veh_id===vid&&a.actif).map(a=>getCond(a.cond_id)).filter(Boolean);
-  const tot=vers.filter(x=>x.veh_id===vid&&x.statut==='valide').reduce((s,x)=>s+(x.montant||0),0);
-  openModal(`<div class="mh"><div><div class="mh-title">🚗 ${v.immat}</div><div style="font-size:11px;color:var(--text3)">${v.marque} ${v.modele||''} ${v.annee||''}</div></div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-      <div class="kpi gr" style="padding:12px"><div class="kpi-val" style="font-size:18px">${fm(tot)}</div><div class="kpi-label">Total versé</div></div>
-      <div class="kpi bl" style="padding:12px"><div class="kpi-val" style="font-size:18px">${actC.length}</div><div class="kpi-label">Conducteurs actifs</div></div>
-    </div>
-    <div class="dr"><span class="dl">Type</span><span class="dv">${v.type||'—'}</span></div>
-    <div class="dr"><span class="dl">Couleur</span><span class="dv">${v.couleur||'—'}</span></div>
-    <div class="dr"><span class="dl">Statut</span><span class="dv">${vehStatusBadge(v.statut)}</span></div>
-    ${actC.map(c=>`<div class="dr"><span class="dl">Conducteur</span><span class="dv">${c.prenom} ${c.nom}</span></div>`).join('')}
-  </div>
-  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Fermer</button><button class="btn btn-p" onclick="closeModal();editVeh('${vid}')">✏️ Modifier</button></div>`);
-}
-
 function editVeh(vid){
-  const vehs=DB.g('vehicules')||[];const v=vehs.find(x=>x.id===vid);if(!v)return;
-  const affs=DB.g('affectations')||[];const conds=DB.g('conducteurs')||[];
-  const actC=affs.filter(a=>a.veh_id===vid&&a.actif).map(a=>a.cond_id);
-  const availConds=conds.filter(c=>c.statut==='actif'||(c.statut&&actC.includes(c.id)));
+  const v=C.vehicules.find(x=>x.id===vid);if(!v)return;
   openModal(`<div class="mh"><div class="mh-title">✏️ Modifier véhicule</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb">
-    ${CU.role==='superadmin'?`<div class="fgrp"><label>Propriétaire</label><select id="ev-prop">${propsSelect(v.prop_id)}</select></div>`:''}
-    <div class="fg">
-      <div class="fgrp"><label>Immatriculation</label><input id="ev-immat" value="${v.immat||''}"/></div>
-      <div class="fgrp"><label>Marque</label><select id="ev-marque">${MARQUES.map(m=>`<option${m===v.marque?' selected':''}>${m}</option>`).join('')}</select></div>
-      <div class="fgrp"><label>Modèle</label><input id="ev-modele" value="${v.modele||''}"/></div>
-      <div class="fgrp"><label>Année</label><input type="number" id="ev-annee" value="${v.annee||''}"/></div>
-      <div class="fgrp"><label>Type</label><select id="ev-type">${TYPES_V.map(t=>`<option${t===v.type?' selected':''}>${t}</option>`).join('')}</select></div>
-      <div class="fgrp"><label>Statut</label><select id="ev-statut">${STATUTS_V.map(s=>`<option value="${s}"${s===v.statut?' selected':''}>${SL_VL[s]}</option>`).join('')}</select></div>
-      <div class="fgrp fg1"><label>Couleur</label><input id="ev-couleur" value="${v.couleur||''}"/></div>
-    </div>
-    <div class="fgrp" style="margin-top:4px"><label>Conducteurs affectés</label>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
-        ${availConds.map(c=>`<label style="display:flex;align-items:center;gap:5px;padding:5px 9px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:11px">
-          <input type="checkbox" value="${c.id}" ${actC.includes(c.id)?'checked':''}> ${c.prenom} ${c.nom}
-        </label>`).join('')}
-        ${availConds.length===0?'<span style="font-size:11px;color:var(--text3)">Aucun conducteur actif disponible</span>':''}
-      </div>
-    </div>
-  </div>
-  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="updateVeh('${vid}')">Enregistrer</button></div>`,
-  'lg');
+  <div class="mb">${CU.role==='superadmin'?`<div class="fgrp"><label>Propriétaire</label><select id="ev-prop">${propsSelect(v.prop_id)}</select></div>`:''}
+  <div class="fg">
+    <div class="fgrp"><label>Immatriculation</label><input id="ev-immat" value="${v.immat||''}"/></div>
+    <div class="fgrp"><label>Marque</label><select id="ev-marque">${MARQUES.map(m=>`<option${m===v.marque?' selected':''}>${m}</option>`).join('')}</select></div>
+    <div class="fgrp"><label>Modèle</label><input id="ev-modele" value="${v.modele||''}"/></div>
+    <div class="fgrp"><label>Année</label><input type="number" id="ev-annee" value="${v.annee||''}"/></div>
+    <div class="fgrp"><label>Type</label><select id="ev-type">${TYPES_V.map(t=>`<option${t===v.type?' selected':''}>${t}</option>`).join('')}</select></div>
+    <div class="fgrp"><label>Statut</label><select id="ev-statut">${STATUTS_V.map(s=>`<option value="${s}"${s===v.statut?' selected':''}>${SL_VL[s]}</option>`).join('')}</select></div>
+    <div class="fgrp fg1"><label>Couleur</label><input id="ev-couleur" value="${v.couleur||''}"/></div>
+  </div></div>
+  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="updateVeh('${vid}')">Enregistrer</button></div>`);
+}
+async function updateVeh(vid){
+  const upd={immat:gv('ev-immat').toUpperCase(),marque:gv('ev-marque'),modele:gv('ev-modele'),annee:gv('ev-annee'),type:gv('ev-type'),statut:gv('ev-statut'),couleur:gv('ev-couleur')};
+  if(CU.role==='superadmin')upd.prop_id=gv('ev-prop');
+  await dbUpd('vehicules',vid,upd);await addLog('Modif véhicule',upd.immat);closeModal();renderVehs();
+}
+async function delVeh(vid){
+  if(!confirm('Supprimer ce véhicule ?'))return;
+  const v=C.vehicules.find(x=>x.id===vid);
+  await dbDel('vehicules',vid);await addLog('Suppression véhicule',v?.immat||'—');renderVehs();
 }
 
-function updateVeh(vid){
-  const vehs=DB.g('vehicules')||[];const v=vehs.find(x=>x.id===vid);if(!v)return;
-  v.immat=gv('ev-immat').toUpperCase()||v.immat;v.marque=gv('ev-marque');v.modele=gv('ev-modele');
-  v.annee=gv('ev-annee');v.type=gv('ev-type');v.statut=gv('ev-statut');v.couleur=gv('ev-couleur');
-  if(CU.role==='superadmin')v.prop_id=gv('ev-prop');
-  const affs=DB.g('affectations')||[];
-  affs.forEach(a=>{if(a.veh_id===vid)a.actif=false;});
-  const boxes=$('modal-box').querySelectorAll('input[type=checkbox]');
-  boxes.forEach(cb=>{
-    if(cb.checked){const ex=affs.find(a=>a.veh_id===vid&&a.cond_id===cb.value);
-      if(ex)ex.actif=true;else affs.push({id:uid(),veh_id:vid,cond_id:cb.value,date:now(),actif:true});}
-  });
-  DB.s('vehicules',vehs);DB.s('affectations',affs);log('Modif véhicule',v.immat);closeModal();renderVehs();
-}
-
-function delVeh(vid){
-  if(!confirm('Supprimer ce véhicule définitivement ?'))return;
-  const vehs=DB.g('vehicules')||[];const i=vehs.findIndex(v=>v.id===vid);if(i<0)return;
-  const immat=vehs[i].immat;vehs.splice(i,1);DB.s('vehicules',vehs);log('Suppression véhicule',immat);renderVehs();
-}
-
-// ============================================================
+// =============================================
 // CONDUCTEURS
-// ============================================================
+// =============================================
 function renderConds(){
-  const conds=myConds();const alerts=getDocAlerts();
-  let html=`<div class="pg-hdr"><div><div class="pg-title">Conducteurs</div><div class="pg-sub">${conds.length} conducteur(s)</div></div></div>
-  ${alerts.length>0?`<div class="alert al-y"><span>⚠️</span> ${alerts.length} alerte(s) de documents en attente</div>`:''}
-  <div class="filters">
-    <div class="srch"><span class="srch-ico">🔍</span><input id="srch-c" placeholder="Nom, téléphone..." oninput="filterConds()"/></div>
-    <select class="fsel" id="fc-st" onchange="filterConds()"><option value="">Tous</option>${STATUTS_C.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>
-  </div>
+  const conds=myConds();const al=getDocAlerts();
+  $('content').innerHTML=`<div class="pg-hdr"><div><div class="pg-title">Conducteurs</div><div class="pg-sub">${conds.length} conducteur(s)</div></div></div>
+  ${al.length>0?`<div class="alert al-y"><span>⚠️</span> ${al.length} alerte(s) de documents</div>`:''}
+  <div class="filters"><div class="srch"><span class="srch-ico">🔍</span><input id="srch-c" placeholder="Nom, téléphone..." oninput="filterConds()"/></div>
+  <select class="fsel" id="fc-st" onchange="filterConds()"><option value="">Tous</option>${STATUTS_C.map(s=>`<option value="${s}">${s}</option>`).join('')}</select></div>
   <div class="tw" id="conds-tw">${condsTable(conds)}</div>`;
-  $('content').innerHTML=html;
 }
-
 function condsTable(conds){
-  if(!conds.length) return`<div class="empty-st" style="padding:50px"><div class="ei">👤</div><h3>Aucun conducteur</h3><p>Ajoutez le premier conducteur</p></div>`;
-  const today=new Date();const isSA=CU.role==='superadmin';
+  if(!conds.length)return`<div class="empty-st" style="padding:50px"><div class="ei">👤</div><h3>Aucun conducteur</h3></div>`;
+  const ico={r:'🔴',y:'🟡',b:'🔵'};
   let html=`<table><thead><tr><th>Photo</th><th>Conducteur</th><th>Téléphone</th><th>Permis exp.</th><th>CNI exp.</th><th>Statut</th><th>Alertes</th><th>Actions</th></tr></thead><tbody>`;
   for(const c of conds){
     const al=[];
-    const ck=(l,d,u)=>{if(!u&&!d){al.push({t:'b',m:l+' manquant'});}else if(d){const diff=daysDiff(d);if(diff<0)al.push({t:'r',m:l+' expiré'});else if(diff<30)al.push({t:'y',m:l+` J-${diff}`});}};
+    const ck=(l,d,u)=>{if(!u&&!d)al.push({t:'b',m:l+' manquant'});else if(d){const diff=daysDiff(d);if(diff<0)al.push({t:'r',m:l+' expiré'});else if(diff<30)al.push({t:'y',m:l+` J-${diff}`});}};
     ck('CNI',c.cni_exp,c.cni_url);ck('Permis',c.permis_exp,c.permis_url);
     const sco={actif:'b-gr',suspendu:'b-rd',inactif:'b-gy'};
-    const ico={r:'🔴',y:'🟡',b:'🔵'};
-    html+=`<tr>
-      <td>${av(c.nom,c.prenom,avc(c.prenom+c.nom),'sm',c.photo_url)}</td>
-      <td><div style="font-weight:700">${c.prenom} ${c.nom}</div></td>
-      <td style="font-size:11px">${c.tel||'—'}</td>
-      <td style="font-size:11px">${fd(c.permis_exp)||'—'}</td>
-      <td style="font-size:11px">${fd(c.cni_exp)||'—'}</td>
-      <td><span class="b ${sco[c.statut]||'b-gy'}">${c.statut||'—'}</span></td>
-      <td>${al.map(a=>`<span class="b ${a.t==='r'?'b-rd':a.t==='y'?'b-ye':'b-bl'}" style="font-size:9px">${ico[a.t]} ${a.m}</span>`).join(' ')||'<span style="color:var(--green);font-size:12px">✓ OK</span>'}</td>
-      <td><div style="display:flex;gap:4px">
-        <button class="btn-ico btn-xs" onclick="viewCond('${c.id}')">👁️</button>
-        <button class="btn-ico btn-xs" onclick="editCond('${c.id}')">✏️</button>
-        <button class="btn-ico btn-xs" onclick="editCondPhoto('${c.id}')">📷</button>
-        ${CU.role==='superadmin'?`<button class="btn-ico btn-xs" onclick="delCond('${c.id}')">🗑️</button>`:''}
-      </div></td>
-    </tr>`;
+    html+=`<tr><td>${avEl(c.nom,c.prenom,avc(c.prenom+c.nom),'sm',c.photo_url)}</td><td><div style="font-weight:700">${c.prenom} ${c.nom}</div></td><td style="font-size:11px">${c.tel||'—'}</td><td style="font-size:11px">${fd(c.permis_exp)||'—'}</td><td style="font-size:11px">${fd(c.cni_exp)||'—'}</td><td><span class="b ${sco[c.statut]||'b-gy'}">${c.statut||'—'}</span></td>
+    <td>${al.map(a=>`<span class="b ${a.t==='r'?'b-rd':a.t==='y'?'b-ye':'b-bl'}" style="font-size:9px">${ico[a.t]} ${a.m}</span>`).join(' ')||'<span style="color:var(--green);font-size:12px">✓ OK</span>'}</td>
+    <td><div style="display:flex;gap:4px"><button class="btn-ico btn-xs" onclick="editCond('${c.id}')">✏️</button>${CU.role==='superadmin'?`<button class="btn-ico btn-xs" onclick="delCond('${c.id}')">🗑️</button>`:''}</div></td></tr>`;
   }
   return html+'</tbody></table>';
 }
-
-function filterConds(){
-  const q=gv('srch-c').toLowerCase();const st=$('fc-st')?.value||'';
-  const conds=myConds().filter(c=>{
-    const ok=!q||(c.nom||'').toLowerCase().includes(q)||(c.prenom||'').toLowerCase().includes(q)||(c.tel||'').includes(q);
-    return ok&&(!st||c.statut===st);
-  });
-  $('conds-tw').innerHTML=condsTable(conds);
-}
+function filterConds(){const q=gv('srch-c').toLowerCase();const st=$('fc-st')?.value||'';$('conds-tw').innerHTML=condsTable(myConds().filter(c=>{const ok=!q||(c.nom||'').toLowerCase().includes(q)||(c.prenom||'').toLowerCase().includes(q)||(c.tel||'').includes(q);return ok&&(!st||c.statut===st);}));}
 
 window.openAddCond=function(){
   const isSA=CU.role==='superadmin';
   openModal(`<div class="mh"><div class="mh-title">👤 Nouveau conducteur</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb">
-    <div style="text-align:center;margin-bottom:14px">
-      <div id="ac-photo-prev" style="width:80px;height:80px;border-radius:50%;background:var(--bg3);border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;margin:0 auto 10px">👤</div>
-      <label class="btn btn-s btn-sm" style="cursor:pointer">📷 Photo <input type="file" accept="image/*" style="display:none" onchange="previewLogo(this,'ac-photo-prev')"></label>
-    </div>
-    ${isSA?`<div class="fgrp"><label>Propriétaire *</label><select id="ac-prop"><option value="">Choisir...</option>${propsSelect()}</select></div>`:''}
-    <div class="fg">
-      <div class="fgrp"><label>Prénom *</label><input id="ac-prenom" placeholder="Prénom"/></div>
-      <div class="fgrp"><label>Nom *</label><input id="ac-nom" placeholder="Nom"/></div>
-      <div class="fgrp"><label>Téléphone</label><input id="ac-tel" placeholder="+221 77..."/></div>
-      <div class="fgrp"><label>Adresse</label><input id="ac-adr" placeholder="Adresse"/></div>
-      <div class="fgrp"><label>Statut</label><select id="ac-statut"><option value="actif">Actif</option><option value="suspendu">Suspendu</option><option value="inactif">Inactif</option></select></div>
-      <div class="fgrp"><label>📄 Expiration permis</label><input type="date" id="ac-permis-exp"/></div>
-      <div class="fgrp"><label>🪪 Expiration CNI</label><input type="date" id="ac-cni-exp"/></div>
-      <div class="fgrp"><label>N° Permis</label><input id="ac-permis-num" placeholder="Numéro du permis"/></div>
-      <div class="fgrp"><label>N° CNI</label><input id="ac-cni-num" placeholder="Numéro CNI"/></div>
-    </div>
-    <div id="ac-err" class="err-msg"></div>
-  </div>
-  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="saveCond()">Créer</button></div>`,
-  'lg');
-}
-
-function saveCond(){
+  <div class="mb">${isSA?`<div class="fgrp"><label>Propriétaire *</label><select id="ac-prop"><option value="">Choisir...</option>${propsSelect()}</select></div>`:''}
+  <div class="fg">
+    <div class="fgrp"><label>Prénom *</label><input id="ac-prenom" placeholder="Prénom"/></div>
+    <div class="fgrp"><label>Nom *</label><input id="ac-nom" placeholder="Nom"/></div>
+    <div class="fgrp"><label>Téléphone</label><input id="ac-tel" placeholder="+221 77..."/></div>
+    <div class="fgrp"><label>Adresse</label><input id="ac-adr" placeholder="Adresse"/></div>
+    <div class="fgrp"><label>Statut</label><select id="ac-statut"><option value="actif">Actif</option><option value="suspendu">Suspendu</option><option value="inactif">Inactif</option></select></div>
+    <div class="fgrp"><label>Expiration permis</label><input type="date" id="ac-permis-exp"/></div>
+    <div class="fgrp"><label>Expiration CNI</label><input type="date" id="ac-cni-exp"/></div>
+    <div class="fgrp"><label>N° Permis</label><input id="ac-permis-num" placeholder="Numéro"/></div>
+    <div class="fgrp"><label>N° CNI</label><input id="ac-cni-num" placeholder="Numéro"/></div>
+  </div><div id="ac-err" class="err-msg"></div></div>
+  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="saveCond()">Créer</button></div>`,'lg');
+};
+async function saveCond(){
   const prenom=gv('ac-prenom'),nom=gv('ac-nom');
   const err=$('ac-err');err.style.display='none';
   if(!prenom||!nom){err.textContent='Prénom et Nom obligatoires';err.style.display='block';return;}
   let pid=getPropId();
   if(CU.role==='superadmin'){pid=gv('ac-prop');if(!pid){err.textContent='Sélectionnez un propriétaire';err.style.display='block';return;}}
-  const photoEl=$('ac-photo-prev');const photo=photoEl?.dataset?.logoData||null;
-  const conds=DB.g('conducteurs')||[];
-  conds.push({id:uid(),prop_id:pid,prenom,nom,tel:gv('ac-tel'),adresse:gv('ac-adr'),
-    statut:gv('ac-statut')||'actif',permis_exp:gvr('ac-permis-exp')||null,cni_exp:gvr('ac-cni-exp')||null,
-    permis_num:gv('ac-permis-num'),cni_num:gv('ac-cni-num'),photo_url:photo,permis_url:null,cni_url:null,created:now()});
-  DB.s('conducteurs',conds);log('Ajout conducteur',prenom+' '+nom);closeModal();renderConds();buildNotifs();
+  await dbIns('conducteurs',{id:uid(),prop_id:pid,prenom,nom,tel:gv('ac-tel'),adresse:gv('ac-adr'),statut:gv('ac-statut')||'actif',permis_exp:gvr('ac-permis-exp')||null,cni_exp:gvr('ac-cni-exp')||null,permis_num:gv('ac-permis-num'),cni_num:gv('ac-cni-num'),photo_url:null,permis_url:null,cni_url:null,created_at:now()});
+  await addLog('Ajout conducteur',prenom+' '+nom);closeModal();renderConds();buildNotifs();
 }
-
-function viewCond(cid){
-  const conds=DB.g('conducteurs')||[];const c=conds.find(x=>x.id===cid);if(!c)return;
-  const vers=DB.g('versements')||[];const tot=vers.filter(v=>v.cond_id===cid&&v.statut==='valide').reduce((s,v)=>s+(v.montant||0),0);
-  const docSt=(l,d,u)=>{if(!u&&!d)return`<span class="b b-bl">🔵 ${l}: Manquant</span>`;
-    if(d){const diff=daysDiff(d);if(diff<0)return`<span class="b b-rd">🔴 ${l}: Expiré (${fd(d)})</span>`;
-      if(diff<30)return`<span class="b b-ye">🟡 ${l}: J-${diff} (${fd(d)})</span>`;}
-    return`<span class="b b-gr">✅ ${l}: Valide${d?' ('+fd(d)+')':''}</span>`;};
-  openModal(`<div class="mh">
-    <div style="display:flex;align-items:center;gap:12px">
-      ${av(c.nom,c.prenom,avc(c.prenom+c.nom),'md',c.photo_url)}
-      <div><div class="mh-title">${c.prenom} ${c.nom}</div><div style="font-size:11px;color:var(--text3)">${c.tel||'—'}</div></div>
-    </div>
-    <div class="x-btn" onclick="closeModal()">✕</div>
-  </div>
-  <div class="mb">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div class="kpi gr" style="padding:12px"><div class="kpi-val" style="font-size:18px">${fm(tot)}</div><div class="kpi-label">Total versé</div></div>
-      <div class="kpi bl" style="padding:12px"><div class="kpi-val" style="font-size:18px">${vers.filter(v=>v.cond_id===cid).length}</div><div class="kpi-label">Versements</div></div>
-    </div>
-    <div class="dr"><span class="dl">Statut</span><span class="dv"><span class="b ${c.statut==='actif'?'b-gr':c.statut==='suspendu'?'b-rd':'b-gy'}">${c.statut||'—'}</span></span></div>
-    <div class="dr"><span class="dl">Adresse</span><span class="dv">${c.adresse||'—'}</span></div>
-    <div class="dr"><span class="dl">N° Permis</span><span class="dv">${c.permis_num||'—'}</span></div>
-    <div class="dr"><span class="dl">N° CNI</span><span class="dv">${c.cni_num||'—'}</span></div>
-    <div style="margin-top:14px"><label style="margin-bottom:8px;display:block">Documents</label>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        ${docSt('Permis',c.permis_exp,c.permis_url)}
-        ${docSt('CNI',c.cni_exp,c.cni_url)}
-      </div>
-    </div>
-  </div>
-  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Fermer</button><button class="btn btn-p" onclick="closeModal();editCond('${cid}')">✏️ Modifier</button></div>`);
-}
-
 function editCond(cid){
-  const conds=DB.g('conducteurs')||[];const c=conds.find(x=>x.id===cid);if(!c)return;
+  const c=C.conducteurs.find(x=>x.id===cid);if(!c)return;
   openModal(`<div class="mh"><div class="mh-title">✏️ Modifier conducteur</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb">
-    ${CU.role==='superadmin'?`<div class="fgrp"><label>Propriétaire</label><select id="ec-prop">${propsSelect(c.prop_id)}</select></div>`:''}
-    <div class="fg">
-      <div class="fgrp"><label>Prénom</label><input id="ec-prenom" value="${c.prenom||''}"/></div>
-      <div class="fgrp"><label>Nom</label><input id="ec-nom" value="${c.nom||''}"/></div>
-      <div class="fgrp"><label>Téléphone</label><input id="ec-tel" value="${c.tel||''}"/></div>
-      <div class="fgrp"><label>Adresse</label><input id="ec-adr" value="${c.adresse||''}"/></div>
-      <div class="fgrp"><label>Statut</label><select id="ec-statut">${STATUTS_C.map(s=>`<option value="${s}"${s===c.statut?' selected':''}>${s}</option>`).join('')}</select></div>
-      <div class="fgrp"><label>Expiration permis</label><input type="date" id="ec-permis-exp" value="${c.permis_exp||''}"/></div>
-      <div class="fgrp"><label>Expiration CNI</label><input type="date" id="ec-cni-exp" value="${c.cni_exp||''}"/></div>
-      <div class="fgrp"><label>N° Permis</label><input id="ec-permis-num" value="${c.permis_num||''}"/></div>
-      <div class="fgrp"><label>N° CNI</label><input id="ec-cni-num" value="${c.cni_num||''}"/></div>
-    </div>
-  </div>
-  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="updateCond('${cid}')">Enregistrer</button></div>`,
-  'lg');
+  <div class="mb">${CU.role==='superadmin'?`<div class="fgrp"><label>Propriétaire</label><select id="ec-prop">${propsSelect(c.prop_id)}</select></div>`:''}
+  <div class="fg">
+    <div class="fgrp"><label>Prénom</label><input id="ec-prenom" value="${c.prenom||''}"/></div>
+    <div class="fgrp"><label>Nom</label><input id="ec-nom" value="${c.nom||''}"/></div>
+    <div class="fgrp"><label>Téléphone</label><input id="ec-tel" value="${c.tel||''}"/></div>
+    <div class="fgrp"><label>Adresse</label><input id="ec-adr" value="${c.adresse||''}"/></div>
+    <div class="fgrp"><label>Statut</label><select id="ec-statut">${STATUTS_C.map(s=>`<option value="${s}"${s===c.statut?' selected':''}>${s}</option>`).join('')}</select></div>
+    <div class="fgrp"><label>Expiration permis</label><input type="date" id="ec-permis-exp" value="${c.permis_exp||''}"/></div>
+    <div class="fgrp"><label>Expiration CNI</label><input type="date" id="ec-cni-exp" value="${c.cni_exp||''}"/></div>
+    <div class="fgrp"><label>N° Permis</label><input id="ec-permis-num" value="${c.permis_num||''}"/></div>
+    <div class="fgrp"><label>N° CNI</label><input id="ec-cni-num" value="${c.cni_num||''}"/></div>
+  </div></div>
+  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="updateCond('${cid}')">Enregistrer</button></div>`,'lg');
 }
-
-function updateCond(cid){
-  const conds=DB.g('conducteurs')||[];const c=conds.find(x=>x.id===cid);if(!c)return;
-  c.prenom=gv('ec-prenom');c.nom=gv('ec-nom');c.tel=gv('ec-tel');c.adresse=gv('ec-adr');
-  c.statut=gv('ec-statut');c.permis_exp=gvr('ec-permis-exp')||null;c.cni_exp=gvr('ec-cni-exp')||null;
-  c.permis_num=gv('ec-permis-num');c.cni_num=gv('ec-cni-num');
-  if(CU.role==='superadmin')c.prop_id=gv('ec-prop');
-  DB.s('conducteurs',conds);log('Modif conducteur',c.prenom+' '+c.nom);closeModal();renderConds();buildNotifs();
+async function updateCond(cid){
+  const upd={prenom:gv('ec-prenom'),nom:gv('ec-nom'),tel:gv('ec-tel'),adresse:gv('ec-adr'),statut:gv('ec-statut'),permis_exp:gvr('ec-permis-exp')||null,cni_exp:gvr('ec-cni-exp')||null,permis_num:gv('ec-permis-num'),cni_num:gv('ec-cni-num')};
+  if(CU.role==='superadmin')upd.prop_id=gv('ec-prop');
+  await dbUpd('conducteurs',cid,upd);await addLog('Modif conducteur',upd.prenom+' '+upd.nom);closeModal();renderConds();buildNotifs();
 }
-
-function editCondPhoto(cid){
-  const conds=DB.g('conducteurs')||[];const c=conds.find(x=>x.id===cid);if(!c)return;
-  openModal(`<div class="mh"><div class="mh-title">📷 Photo — ${c.prenom} ${c.nom}</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb" style="text-align:center">
-    <div id="cp-prev" style="width:100px;height:100px;border-radius:50%;background:var(--bg3);border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:36px;overflow:hidden;margin:0 auto 16px">
-      ${c.photo_url?`<img src="${c.photo_url}" style="width:100%;height:100%;object-fit:cover">`:'👤'}
-    </div>
-    <div class="uplz" style="max-width:300px;margin:0 auto">
-      <input type="file" accept="image/*" onchange="previewLogoEdit(this,'cp-prev')">
-      <div class="uplz-ico">📷</div><div class="uplz-txt">Cliquez ou glissez une photo</div>
-    </div>
-  </div>
-  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="saveCondPhoto('${cid}')">Enregistrer</button></div>`);
-}
-
-function saveCondPhoto(cid){
-  const el=$('cp-prev');const d=el?.dataset?.logoData;if(!d){closeModal();return;}
-  const conds=DB.g('conducteurs')||[];const c=conds.find(x=>x.id===cid);if(!c)return;
-  c.photo_url=d;DB.s('conducteurs',conds);log('Photo conducteur',c.prenom+' '+c.nom);closeModal();renderConds();
-}
-
-function delCond(cid){
+async function delCond(cid){
   if(!confirm('Supprimer ce conducteur ?'))return;
-  const conds=DB.g('conducteurs')||[];const i=conds.findIndex(c=>c.id===cid);if(i<0)return;
-  const name=conds[i].prenom+' '+conds[i].nom;conds.splice(i,1);DB.s('conducteurs',conds);
-  log('Suppression conducteur',name);renderConds();buildNotifs();
+  const c=C.conducteurs.find(x=>x.id===cid);
+  await dbDel('conducteurs',cid);await addLog('Suppression conducteur',c?.prenom+' '+c?.nom);renderConds();buildNotifs();
 }
 
-// ============================================================
+// =============================================
 // VERSEMENTS
-// ============================================================
+// =============================================
 function renderVers(){
-  const vers=myVers();
-  const tot=vers.filter(v=>v.statut==='valide').reduce((s,v)=>s+(v.montant||0),0);
-  let html=`<div class="pg-hdr"><div><div class="pg-title">Versements</div><div class="pg-sub">${vers.length} versement(s) — Total validé: ${fm(tot)}</div></div></div>
-  <div class="filters">
-    <div class="srch"><span class="srch-ico">🔍</span><input id="srch-ver" placeholder="Véhicule, conducteur..." oninput="filterVers()"/></div>
-    <input type="date" id="fver-dd" onchange="filterVers()" style="width:auto;min-width:130px" title="Depuis"/>
-    <input type="date" id="fver-df" onchange="filterVers()" style="width:auto;min-width:130px" title="Jusqu'au"/>
-    <select class="fsel" id="fver-st" onchange="filterVers()"><option value="">Tous statuts</option>${STATUTS_VER.map(s=>`<option value="${s}">${s==='valide'?'Validé':s==='attente'?'En attente':'Litige'}</option>`).join('')}</select>
-  </div>
+  const vers=myVers();const tot=vers.filter(v=>v.statut==='valide').reduce((s,v)=>s+(v.montant||0),0);
+  $('content').innerHTML=`<div class="pg-hdr"><div><div class="pg-title">Versements</div><div class="pg-sub">${vers.length} versement(s) — Total validé: ${fm(tot)}</div></div></div>
+  <div class="filters"><div class="srch"><span class="srch-ico">🔍</span><input id="srch-ver" placeholder="Véhicule, conducteur..." oninput="filterVers()"/></div>
+  <input type="date" id="fver-dd" onchange="filterVers()" style="width:auto;min-width:130px"/>
+  <input type="date" id="fver-df" onchange="filterVers()" style="width:auto;min-width:130px"/>
+  <select class="fsel" id="fver-st" onchange="filterVers()"><option value="">Tous statuts</option>${STATUTS_VER.map(s=>`<option value="${s}">${s==='valide'?'Validé':s==='attente'?'En attente':'Litige'}</option>`).join('')}</select></div>
   <div class="tw" id="vers-tw">${versTable(vers)}</div>`;
-  $('content').innerHTML=html;
 }
-
 function versTable(vers){
-  if(!vers.length) return`<div class="empty-st" style="padding:50px"><div class="ei">💰</div><h3>Aucun versement</h3><p>Enregistrez le premier versement</p></div>`;
-  const sorted=[...vers].sort((a,b)=>new Date(b.created||b.date)-new Date(a.created||a.date));
-  let html=`<table><thead><tr><th>Date</th><th>Véhicule</th><th>Conducteur</th><th>Montant</th><th>Statut</th><th>Agent</th><th>Note</th><th>Actions</th></tr></thead><tbody>`;
+  if(!vers.length)return`<div class="empty-st" style="padding:50px"><div class="ei">💰</div><h3>Aucun versement</h3></div>`;
+  const sorted=[...vers].sort((a,b)=>new Date(b.created_at||b.date)-new Date(a.created_at||a.date));
+  let html=`<table><thead><tr><th>Date</th><th>Véhicule</th><th>Conducteur</th><th>Montant</th><th>Statut</th><th>Note</th><th>Actions</th></tr></thead><tbody>`;
   for(const v of sorted){
-    const vh=getVeh(v.veh_id);const cd=getCond(v.cond_id);const ag=getUser(v.agent_id);
-    html+=`<tr>
-      <td style="white-space:nowrap">${fd(v.date)}</td>
-      <td><span style="font-family:var(--mono);font-size:11px;color:var(--accent)">${vh?vh.immat:'—'}</span></td>
-      <td>${cd?cd.prenom+' '+cd.nom:'—'}</td>
-      <td style="font-weight:800;color:${v.statut==='valide'?'var(--green)':v.statut==='litige'?'var(--red)':'var(--yellow)'}">${fm(v.montant)}</td>
-      <td>${statusBadge(v.statut)}</td>
-      <td style="font-size:10px;color:var(--text3)">${ag?ag.prenom+' '+ag.nom.charAt(0)+'.':'—'}</td>
-      <td style="font-size:11px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.note||'—'}</td>
-      <td><div style="display:flex;gap:3px;flex-wrap:wrap">
-        ${v.statut!=='valide'?`<button class="btn btn-ok btn-xs" onclick="setVersStatut('${v.id}','valide')">✓</button>`:''}
-        ${v.statut!=='litige'?`<button class="btn btn-d btn-xs" onclick="setVersStatut('${v.id}','litige')">⚠</button>`:''}
-        <button class="btn btn-s btn-xs" onclick="editVers('${v.id}')">✏️</button>
-        ${CU.role==='superadmin'?`<button class="btn btn-d btn-xs" onclick="delVers('${v.id}')">🗑️</button>`:''}
-      </div></td>
-    </tr>`;
+    const vh=getVeh(v.veh_id);const cd=getCond(v.cond_id);
+    html+=`<tr><td>${fd(v.date)}</td><td><span style="font-family:var(--mono);font-size:11px;color:var(--accent)">${vh?vh.immat:'—'}</span></td><td>${cd?cd.prenom+' '+cd.nom:'—'}</td>
+    <td style="font-weight:800;color:${v.statut==='valide'?'var(--green)':v.statut==='litige'?'var(--red)':'var(--yellow)'}">${fm(v.montant)}</td>
+    <td>${statusBadge(v.statut)}</td><td style="font-size:11px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.note||'—'}</td>
+    <td><div style="display:flex;gap:3px;flex-wrap:wrap">
+      ${v.statut!=='valide'?`<button class="btn btn-ok btn-xs" onclick="setVSt('${v.id}','valide')">✓</button>`:''}
+      ${v.statut!=='litige'?`<button class="btn btn-d btn-xs" onclick="setVSt('${v.id}','litige')">⚠</button>`:''}
+      <button class="btn btn-s btn-xs" onclick="editVers('${v.id}')">✏️</button>
+      ${CU.role==='superadmin'?`<button class="btn btn-d btn-xs" onclick="delVers('${v.id}')">🗑️</button>`:''}
+    </div></td></tr>`;
   }
   return html+'</tbody></table>';
 }
-
 function filterVers(){
-  const q=gv('srch-ver').toLowerCase();const st=$('fver-st')?.value||'';
-  const dd=$('fver-dd')?.value;const df=$('fver-df')?.value;
-  const vers=myVers().filter(v=>{
-    const vh=getVeh(v.veh_id)||{};const cd=getCond(v.cond_id)||{};
-    const ok=!q||(vh.immat||'').toLowerCase().includes(q)||(cd.nom||'').toLowerCase().includes(q)||(cd.prenom||'').toLowerCase().includes(q);
-    const d=new Date(v.date);
-    return ok&&(!st||v.statut===st)&&(!dd||d>=new Date(dd))&&(!df||d<=new Date(df+'T23:59:59'));
-  });
-  $('vers-tw').innerHTML=versTable(vers);
+  const q=gv('srch-ver').toLowerCase();const st=$('fver-st')?.value||'';const dd=$('fver-dd')?.value;const df=$('fver-df')?.value;
+  $('vers-tw').innerHTML=versTable(myVers().filter(v=>{const vh=getVeh(v.veh_id)||{};const cd=getCond(v.cond_id)||{};const ok=!q||(vh.immat||'').toLowerCase().includes(q)||(cd.nom||'').toLowerCase().includes(q);const d=new Date(v.date);return ok&&(!st||v.statut===st)&&(!dd||d>=new Date(dd))&&(!df||d<=new Date(df+'T23:59:59'));}));
 }
 
 window.openAddVers=function(){
-  const isSA=CU.role==='superadmin';
-  const mV=myVehs();const mC=myConds();
+  const isSA=CU.role==='superadmin';const mV=myVehs();const mC=myConds();
   const today=new Date().toISOString().split('T')[0];
   openModal(`<div class="mh"><div class="mh-title">💰 Nouveau versement</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb">
-    ${isSA?`<div class="fgrp"><label>Propriétaire *</label><select id="aver-prop" onchange="updateVersVehs()"><option value="">Choisir...</option>${propsSelect()}</select></div>`:''}
-    <div class="fg">
-      <div class="fgrp"><label>Véhicule *</label><select id="aver-veh"><option value="">Choisir...</option>${mV.map(v=>`<option value="${v.id}">${v.immat} — ${v.marque}</option>`).join('')}</select></div>
-      <div class="fgrp"><label>Conducteur *</label><select id="aver-cond"><option value="">Choisir...</option>${mC.map(c=>`<option value="${c.id}">${c.prenom} ${c.nom}</option>`).join('')}</select></div>
-      <div class="fgrp"><label>Montant (FCFA) *</label><input type="number" id="aver-montant" placeholder="Ex: 15000" min="1"/></div>
-      <div class="fgrp"><label>Date *</label><input type="date" id="aver-date" value="${today}"/></div>
-      <div class="fgrp fg1"><label>Statut</label><select id="aver-statut"><option value="attente">En attente</option><option value="valide">Validé</option><option value="litige">Litige</option></select></div>
-      <div class="fgrp fg1"><label>Note / Observation</label><textarea id="aver-note" rows="2" placeholder="Observation facultative..."></textarea></div>
-    </div>
-    <div id="aver-err" class="err-msg"></div>
-  </div>
+  <div class="mb">${isSA?`<div class="fgrp"><label>Propriétaire *</label><select id="aver-prop" onchange="updVersVehs()"><option value="">Choisir...</option>${propsSelect()}</select></div>`:''}
+  <div class="fg">
+    <div class="fgrp"><label>Véhicule *</label><select id="aver-veh"><option value="">Choisir...</option>${mV.map(v=>`<option value="${v.id}">${v.immat} — ${v.marque}</option>`).join('')}</select></div>
+    <div class="fgrp"><label>Conducteur *</label><select id="aver-cond"><option value="">Choisir...</option>${mC.map(c=>`<option value="${c.id}">${c.prenom} ${c.nom}</option>`).join('')}</select></div>
+    <div class="fgrp"><label>Montant (FCFA) *</label><input type="number" id="aver-montant" placeholder="Ex: 15000" min="1"/></div>
+    <div class="fgrp"><label>Date *</label><input type="date" id="aver-date" value="${today}"/></div>
+    <div class="fgrp fg1"><label>Statut</label><select id="aver-statut"><option value="attente">En attente</option><option value="valide">Validé</option><option value="litige">Litige</option></select></div>
+    <div class="fgrp fg1"><label>Note</label><textarea id="aver-note" rows="2" placeholder="Observation facultative..."></textarea></div>
+  </div><div id="aver-err" class="err-msg"></div></div>
   <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="saveVers()">Enregistrer</button></div>`);
-}
-
-function updateVersVehs(){
-  const pid=gv('aver-prop');
-  const vehs=pid?(DB.g('vehicules')||[]).filter(v=>v.prop_id===pid):myVehs();
-  const conds=pid?(DB.g('conducteurs')||[]).filter(c=>c.prop_id===pid):myConds();
-  $('aver-veh').innerHTML='<option value="">Choisir...</option>'+vehs.map(v=>`<option value="${v.id}">${v.immat} — ${v.marque}</option>`).join('');
-  $('aver-cond').innerHTML='<option value="">Choisir...</option>'+conds.map(c=>`<option value="${c.id}">${c.prenom} ${c.nom}</option>`).join('');
-}
-
-function saveVers(){
+};
+function updVersVehs(){const pid=gv('aver-prop');const vehs=pid?C.vehicules.filter(v=>v.prop_id===pid):myVehs();const conds=pid?C.conducteurs.filter(c=>c.prop_id===pid):myConds();$('aver-veh').innerHTML='<option value="">Choisir...</option>'+vehs.map(v=>`<option value="${v.id}">${v.immat} — ${v.marque}</option>`).join('');$('aver-cond').innerHTML='<option value="">Choisir...</option>'+conds.map(c=>`<option value="${c.id}">${c.prenom} ${c.nom}</option>`).join('');}
+async function saveVers(){
   const veh=gv('aver-veh'),cond=gv('aver-cond'),montant=parseFloat(gvr('aver-montant')),date=gvr('aver-date');
   const err=$('aver-err');err.style.display='none';
   if(!veh||!cond||!montant||!date){err.textContent='Champs obligatoires manquants';err.style.display='block';return;}
   if(montant<=0){err.textContent='Montant invalide';err.style.display='block';return;}
   let pid=getPropId();
   if(CU.role==='superadmin'){pid=gv('aver-prop');if(!pid){err.textContent='Sélectionnez un propriétaire';err.style.display='block';return;}}
-  const vers=DB.g('versements')||[];
-  vers.push({id:uid(),prop_id:pid,veh_id:veh,cond_id:cond,montant,date,statut:gv('aver-statut')||'attente',note:gv('aver-note'),agent_id:CU.id,created:now()});
-  DB.s('versements',vers);log('Saisie versement',fm(montant)+' — '+date);closeModal();renderVers();buildNotifs();
+  await dbIns('versements',{id:uid(),prop_id:pid,veh_id:veh,cond_id:cond,montant,date,statut:gv('aver-statut')||'attente',note:gv('aver-note'),agent_id:CU.id,created_at:now()});
+  await addLog('Saisie versement',fm(montant)+' — '+date);closeModal();renderVers();buildNotifs();
 }
-
 function editVers(vid){
-  const vers=DB.g('versements')||[];const v=vers.find(x=>x.id===vid);if(!v)return;
-  const mV=myVehs();const mC=myConds();
+  const v=C.versements.find(x=>x.id===vid);if(!v)return;const mV=myVehs();const mC=myConds();
   openModal(`<div class="mh"><div class="mh-title">✏️ Modifier versement</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb">
-    <div class="fg">
-      <div class="fgrp"><label>Véhicule</label><select id="ever-veh">${mV.map(x=>`<option value="${x.id}"${x.id===v.veh_id?' selected':''}>${x.immat}</option>`).join('')}</select></div>
-      <div class="fgrp"><label>Conducteur</label><select id="ever-cond">${mC.map(x=>`<option value="${x.id}"${x.id===v.cond_id?' selected':''}>${x.prenom} ${x.nom}</option>`).join('')}</select></div>
-      <div class="fgrp"><label>Montant (FCFA)</label><input type="number" id="ever-montant" value="${v.montant}"/></div>
-      <div class="fgrp"><label>Date</label><input type="date" id="ever-date" value="${v.date}"/></div>
-      <div class="fgrp fg1"><label>Statut</label><select id="ever-statut">${STATUTS_VER.map(s=>`<option value="${s}"${s===v.statut?' selected':''}>${s==='valide'?'Validé':s==='attente'?'En attente':'Litige'}</option>`).join('')}</select></div>
-      <div class="fgrp fg1"><label>Note</label><textarea id="ever-note" rows="2">${v.note||''}</textarea></div>
-    </div>
-  </div>
+  <div class="mb"><div class="fg">
+    <div class="fgrp"><label>Véhicule</label><select id="ever-veh">${mV.map(x=>`<option value="${x.id}"${x.id===v.veh_id?' selected':''}>${x.immat}</option>`).join('')}</select></div>
+    <div class="fgrp"><label>Conducteur</label><select id="ever-cond">${mC.map(x=>`<option value="${x.id}"${x.id===v.cond_id?' selected':''}>${x.prenom} ${x.nom}</option>`).join('')}</select></div>
+    <div class="fgrp"><label>Montant (FCFA)</label><input type="number" id="ever-montant" value="${v.montant}"/></div>
+    <div class="fgrp"><label>Date</label><input type="date" id="ever-date" value="${v.date}"/></div>
+    <div class="fgrp fg1"><label>Statut</label><select id="ever-statut">${STATUTS_VER.map(s=>`<option value="${s}"${s===v.statut?' selected':''}>${s==='valide'?'Validé':s==='attente'?'En attente':'Litige'}</option>`).join('')}</select></div>
+    <div class="fgrp fg1"><label>Note</label><textarea id="ever-note" rows="2">${v.note||''}</textarea></div>
+  </div></div>
   <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="updateVers('${vid}')">Enregistrer</button></div>`);
 }
+async function updateVers(vid){const upd={veh_id:gv('ever-veh'),cond_id:gv('ever-cond'),montant:parseFloat(gvr('ever-montant')),date:gvr('ever-date'),statut:gv('ever-statut'),note:gv('ever-note')};await dbUpd('versements',vid,upd);await addLog('Modif versement',fm(upd.montant));closeModal();renderVers();}
+async function setVSt(vid,statut){await dbUpd('versements',vid,{statut});await addLog('Statut versement','→ '+statut);renderVers();}
+async function delVers(vid){if(CU.role!=='superadmin'){alert('Réservé au Super Admin');return;}if(!confirm('Supprimer ce versement ?'))return;await dbDel('versements',vid);await addLog('Suppression versement','—');renderVers();}
 
-function updateVers(vid){
-  const vers=DB.g('versements')||[];const v=vers.find(x=>x.id===vid);if(!v)return;
-  v.veh_id=gv('ever-veh');v.cond_id=gv('ever-cond');v.montant=parseFloat(gvr('ever-montant'));
-  v.date=gvr('ever-date');v.statut=gv('ever-statut');v.note=gv('ever-note');
-  DB.s('versements',vers);log('Modif versement',fm(v.montant));closeModal();renderVers();
-}
-
-function setVersStatut(vid,statut){
-  const vers=DB.g('versements')||[];const v=vers.find(x=>x.id===vid);if(!v)return;
-  v.statut=statut;DB.s('versements',vers);log('Statut versement','→ '+statut);renderVers();
-}
-
-function delVers(vid){
-  if(CU.role!=='superadmin'){alert('Réservé au Super Admin');return;}
-  if(!confirm('Supprimer ce versement définitivement ?'))return;
-  const vers=DB.g('versements')||[];const i=vers.findIndex(v=>v.id===vid);
-  if(i<0)return;vers.splice(i,1);DB.s('versements',vers);log('Suppression versement','—');renderVers();
-}
-
-// ============================================================
+// =============================================
 // DÉPENSES
-// ============================================================
+// =============================================
 function renderDeps(){
-  const deps=myDeps();
-  const tot=deps.reduce((s,d)=>s+(d.montant||0),0);
-  let html=`<div class="pg-hdr"><div><div class="pg-title">Dépenses</div><div class="pg-sub">${deps.length} dépense(s) — Total: ${fm(tot)}</div></div></div>
-  <div class="filters">
-    <div class="srch"><span class="srch-ico">🔍</span><input id="srch-dep" placeholder="Véhicule, catégorie..." oninput="filterDeps()"/></div>
-    <input type="date" id="fdep-dd" onchange="filterDeps()" style="width:auto;min-width:130px"/>
-    <input type="date" id="fdep-df" onchange="filterDeps()" style="width:auto;min-width:130px"/>
-    <select class="fsel" id="fdep-cat" onchange="filterDeps()"><option value="">Toutes catégories</option>${CATS_DEP.map(c=>`<option value="${c}">${c}</option>`).join('')}</select>
-  </div>
+  const deps=myDeps();const tot=deps.reduce((s,d)=>s+(d.montant||0),0);
+  $('content').innerHTML=`<div class="pg-hdr"><div><div class="pg-title">Dépenses</div><div class="pg-sub">${deps.length} dépense(s) — Total: ${fm(tot)}</div></div></div>
+  <div class="filters"><div class="srch"><span class="srch-ico">🔍</span><input id="srch-dep" placeholder="Véhicule, catégorie..." oninput="filterDeps()"/></div>
+  <input type="date" id="fdep-dd" onchange="filterDeps()" style="width:auto;min-width:130px"/>
+  <input type="date" id="fdep-df" onchange="filterDeps()" style="width:auto;min-width:130px"/>
+  <select class="fsel" id="fdep-cat" onchange="filterDeps()"><option value="">Toutes catégories</option>${CATS_DEP.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div>
   <div class="tw" id="deps-tw">${depsTable(deps)}</div>`;
-  $('content').innerHTML=html;
 }
-
 function depsTable(deps){
-  if(!deps.length) return`<div class="empty-st" style="padding:50px"><div class="ei">💸</div><h3>Aucune dépense</h3><p>Enregistrez la première dépense</p></div>`;
-  const sorted=[...deps].sort((a,b)=>new Date(b.created||b.date)-new Date(a.created||a.date));
-  const isSA=CU.role==='superadmin';
-  let html=`<table><thead><tr><th>Date</th><th>Catégorie</th><th>Véhicule</th><th>Conducteur</th><th>Montant</th>${isSA?'<th>Propriétaire</th>':''}<th>Note</th><th>Agent</th><th>Actions</th></tr></thead><tbody>`;
+  if(!deps.length)return`<div class="empty-st" style="padding:50px"><div class="ei">💸</div><h3>Aucune dépense</h3></div>`;
+  const sorted=[...deps].sort((a,b)=>new Date(b.created_at||b.date)-new Date(a.created_at||a.date));
+  const catC={'Carburant':'b-or','Entretien / Mécanique':'b-bl','Assurance':'b-vi','Vignette / Taxes':'b-ye','Réparation':'b-rd','Salaire / Prime':'b-gr','Autre':'b-gy'};
+  let html=`<table><thead><tr><th>Date</th><th>Catégorie</th><th>Véhicule</th><th>Montant</th><th>Note</th><th>Actions</th></tr></thead><tbody>`;
   for(const d of sorted){
-    const vh=getVeh(d.veh_id);const cd=getCond(d.cond_id);const ag=getUser(d.agent_id);
-    const pu=isSA?getUser(d.prop_id):null;
-    const catColors={'Carburant':'b-or','Entretien / Mécanique':'b-bl','Assurance':'b-vi','Vignette / Taxes':'b-ye','Réparation':'b-rd','Pneus':'b-gy','Salaire / Prime':'b-gr','Autre':'b-gy'};
-    html+=`<tr>
-      <td style="white-space:nowrap">${fd(d.date)}</td>
-      <td><span class="b ${catColors[d.categorie]||'b-gy'}">${d.categorie||'—'}</span></td>
-      <td><span style="font-family:var(--mono);font-size:11px;color:var(--accent)">${vh?vh.immat:'—'}</span></td>
-      <td style="font-size:11px">${cd?cd.prenom+' '+cd.nom:'—'}</td>
-      <td style="font-weight:800;color:var(--red)">${fm(d.montant)}</td>
-      ${isSA?`<td style="font-size:11px">${pu?pu.prenom+' '+pu.nom:'—'}</td>`:''}
-      <td style="font-size:11px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.note||'—'}</td>
-      <td style="font-size:10px;color:var(--text3)">${ag?ag.prenom+' '+ag.nom.charAt(0)+'.':'—'}</td>
-      <td><div style="display:flex;gap:3px">
-        <button class="btn-ico btn-xs" onclick="viewDep('${d.id}')">👁️</button>
-        <button class="btn-ico btn-xs" onclick="editDep('${d.id}')">✏️</button>
-        ${CU.role==='superadmin'?`<button class="btn-ico btn-xs" onclick="delDep('${d.id}')">🗑️</button>`:''}
-      </div></td>
-    </tr>`;
+    const vh=getVeh(d.veh_id);
+    html+=`<tr><td>${fd(d.date)}</td><td><span class="b ${catC[d.categorie]||'b-gy'}">${d.categorie||'—'}</span></td><td><span style="font-family:var(--mono);font-size:11px;color:var(--accent)">${vh?vh.immat:'—'}</span></td><td style="font-weight:800;color:var(--red)">${fm(d.montant)}</td><td style="font-size:11px">${d.note||'—'}</td>
+    <td><div style="display:flex;gap:3px"><button class="btn-ico btn-xs" onclick="editDep('${d.id}')">✏️</button>${CU.role==='superadmin'?`<button class="btn-ico btn-xs" onclick="delDep('${d.id}')">🗑️</button>`:''}</div></td></tr>`;
   }
   return html+'</tbody></table>';
 }
-
-function filterDeps(){
-  const q=gv('srch-dep').toLowerCase();const cat=$('fdep-cat')?.value||'';
-  const dd=$('fdep-dd')?.value;const df=$('fdep-df')?.value;
-  const deps=myDeps().filter(d=>{
-    const vh=getVeh(d.veh_id)||{};
-    const ok=!q||(vh.immat||'').toLowerCase().includes(q)||(d.categorie||'').toLowerCase().includes(q)||(d.note||'').toLowerCase().includes(q);
-    const dt=new Date(d.date);
-    return ok&&(!cat||d.categorie===cat)&&(!dd||dt>=new Date(dd))&&(!df||dt<=new Date(df+'T23:59:59'));
-  });
-  $('deps-tw').innerHTML=depsTable(deps);
-}
+function filterDeps(){const q=gv('srch-dep').toLowerCase();const cat=$('fdep-cat')?.value||'';const dd=$('fdep-dd')?.value;const df=$('fdep-df')?.value;$('deps-tw').innerHTML=depsTable(myDeps().filter(d=>{const vh=getVeh(d.veh_id)||{};const ok=!q||(vh.immat||'').toLowerCase().includes(q)||(d.categorie||'').toLowerCase().includes(q);const dt=new Date(d.date);return ok&&(!cat||d.categorie===cat)&&(!dd||dt>=new Date(dd))&&(!df||dt<=new Date(df+'T23:59:59'));}));}
 
 window.openAddDep=function(){
   const isSA=CU.role==='superadmin';const mV=myVehs();const mC=myConds();
   const today=new Date().toISOString().split('T')[0];
   openModal(`<div class="mh"><div class="mh-title">💸 Nouvelle dépense</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb">
-    ${isSA?`<div class="fgrp"><label>Propriétaire *</label><select id="adep-prop" onchange="updateDepVehs()"><option value="">Choisir...</option>${propsSelect()}</select></div>`:''}
-    <div class="fg">
-      <div class="fgrp"><label>Catégorie *</label><select id="adep-cat"><option value="">Choisir...</option>${CATS_DEP.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div>
-      <div class="fgrp"><label>Montant (FCFA) *</label><input type="number" id="adep-montant" placeholder="Ex: 5000" min="1"/></div>
-      <div class="fgrp"><label>Date *</label><input type="date" id="adep-date" value="${today}"/></div>
-      <div class="fgrp"><label>Véhicule</label><select id="adep-veh"><option value="">Aucun</option>${mV.map(v=>`<option value="${v.id}">${v.immat} — ${v.marque}</option>`).join('')}</select></div>
-      <div class="fgrp"><label>Conducteur</label><select id="adep-cond"><option value="">Aucun</option>${mC.map(c=>`<option value="${c.id}">${c.prenom} ${c.nom}</option>`).join('')}</select></div>
-      <div class="fgrp fg1"><label>Description / Note</label><textarea id="adep-note" rows="2" placeholder="Description facultative..."></textarea></div>
-    </div>
-    <div id="adep-err" class="err-msg"></div>
-  </div>
+  <div class="mb">${isSA?`<div class="fgrp"><label>Propriétaire *</label><select id="adep-prop" onchange="updDepVehs()"><option value="">Choisir...</option>${propsSelect()}</select></div>`:''}
+  <div class="fg">
+    <div class="fgrp"><label>Catégorie *</label><select id="adep-cat"><option value="">Choisir...</option>${CATS_DEP.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div>
+    <div class="fgrp"><label>Montant (FCFA) *</label><input type="number" id="adep-montant" placeholder="Ex: 5000" min="1"/></div>
+    <div class="fgrp"><label>Date *</label><input type="date" id="adep-date" value="${today}"/></div>
+    <div class="fgrp"><label>Véhicule</label><select id="adep-veh"><option value="">Aucun</option>${mV.map(v=>`<option value="${v.id}">${v.immat} — ${v.marque}</option>`).join('')}</select></div>
+    <div class="fgrp"><label>Conducteur</label><select id="adep-cond"><option value="">Aucun</option>${mC.map(c=>`<option value="${c.id}">${c.prenom} ${c.nom}</option>`).join('')}</select></div>
+    <div class="fgrp fg1"><label>Note</label><textarea id="adep-note" rows="2" placeholder="Description..."></textarea></div>
+  </div><div id="adep-err" class="err-msg"></div></div>
   <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="saveDep()">Enregistrer</button></div>`);
-}
-
-function updateDepVehs(){
-  const pid=gv('adep-prop');
-  const vehs=pid?(DB.g('vehicules')||[]).filter(v=>v.prop_id===pid):myVehs();
-  const conds=pid?(DB.g('conducteurs')||[]).filter(c=>c.prop_id===pid):myConds();
-  $('adep-veh').innerHTML='<option value="">Aucun</option>'+vehs.map(v=>`<option value="${v.id}">${v.immat} — ${v.marque}</option>`).join('');
-  $('adep-cond').innerHTML='<option value="">Aucun</option>'+conds.map(c=>`<option value="${c.id}">${c.prenom} ${c.nom}</option>`).join('');
-}
-
-function saveDep(){
+};
+function updDepVehs(){const pid=gv('adep-prop');const vehs=pid?C.vehicules.filter(v=>v.prop_id===pid):myVehs();const conds=pid?C.conducteurs.filter(c=>c.prop_id===pid):myConds();$('adep-veh').innerHTML='<option value="">Aucun</option>'+vehs.map(v=>`<option value="${v.id}">${v.immat} — ${v.marque}</option>`).join('');$('adep-cond').innerHTML='<option value="">Aucun</option>'+conds.map(c=>`<option value="${c.id}">${c.prenom} ${c.nom}</option>`).join('');}
+async function saveDep(){
   const cat=gv('adep-cat'),montant=parseFloat(gvr('adep-montant')),date=gvr('adep-date');
   const err=$('adep-err');err.style.display='none';
   if(!cat||!montant||!date){err.textContent='Catégorie, montant et date obligatoires';err.style.display='block';return;}
   if(montant<=0){err.textContent='Montant invalide';err.style.display='block';return;}
   let pid=getPropId();
   if(CU.role==='superadmin'){pid=gv('adep-prop');if(!pid){err.textContent='Sélectionnez un propriétaire';err.style.display='block';return;}}
-  const deps=DB.g('depenses')||[];
-  deps.push({id:uid(),prop_id:pid,categorie:cat,montant,date,veh_id:gv('adep-veh')||null,
-    cond_id:gv('adep-cond')||null,note:gv('adep-note'),agent_id:CU.id,created:now()});
-  DB.s('depenses',deps);log('Saisie dépense',cat+' — '+fm(montant));closeModal();renderDeps();
+  await dbIns('depenses',{id:uid(),prop_id:pid,categorie:cat,montant,date,veh_id:gv('adep-veh')||null,cond_id:gv('adep-cond')||null,note:gv('adep-note'),agent_id:CU.id,created_at:now()});
+  await addLog('Saisie dépense',cat+' — '+fm(montant));closeModal();renderDeps();
 }
-
-function viewDep(did){
-  const deps=DB.g('depenses')||[];const d=deps.find(x=>x.id===did);if(!d)return;
-  const vh=getVeh(d.veh_id);const cd=getCond(d.cond_id);const ag=getUser(d.agent_id);
-  openModal(`<div class="mh"><div class="mh-title">💸 Détail dépense</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb">
-    <div style="text-align:center;margin-bottom:16px">
-      <div style="font-size:32px">💸</div>
-      <div style="font-size:24px;font-weight:800;color:var(--red);margin-top:4px">${fm(d.montant)}</div>
-      <div style="font-size:13px;color:var(--text3)">${d.categorie}</div>
-    </div>
-    <div class="dr"><span class="dl">Date</span><span class="dv">${fd(d.date)}</span></div>
-    <div class="dr"><span class="dl">Véhicule</span><span class="dv">${vh?vh.immat:'—'}</span></div>
-    <div class="dr"><span class="dl">Conducteur</span><span class="dv">${cd?cd.prenom+' '+cd.nom:'—'}</span></div>
-    <div class="dr"><span class="dl">Agent</span><span class="dv">${ag?ag.prenom+' '+ag.nom:'—'}</span></div>
-    <div class="dr"><span class="dl">Note</span><span class="dv">${d.note||'—'}</span></div>
-    <div class="dr"><span class="dl">Enregistré le</span><span class="dv">${fdt(d.created)}</span></div>
-  </div>
-  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Fermer</button><button class="btn btn-p" onclick="closeModal();editDep('${did}')">✏️ Modifier</button></div>`);
-}
-
 function editDep(did){
-  const deps=DB.g('depenses')||[];const d=deps.find(x=>x.id===did);if(!d)return;
-  const mV=myVehs();const mC=myConds();
+  const d=C.depenses.find(x=>x.id===did);if(!d)return;const mV=myVehs();
   openModal(`<div class="mh"><div class="mh-title">✏️ Modifier dépense</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb">
-    <div class="fg">
-      <div class="fgrp"><label>Catégorie</label><select id="edep-cat">${CATS_DEP.map(c=>`<option value="${c}"${c===d.categorie?' selected':''}>${c}</option>`).join('')}</select></div>
-      <div class="fgrp"><label>Montant (FCFA)</label><input type="number" id="edep-montant" value="${d.montant}"/></div>
-      <div class="fgrp"><label>Date</label><input type="date" id="edep-date" value="${d.date}"/></div>
-      <div class="fgrp"><label>Véhicule</label><select id="edep-veh"><option value="">Aucun</option>${mV.map(v=>`<option value="${v.id}"${v.id===d.veh_id?' selected':''}>${v.immat}</option>`).join('')}</select></div>
-      <div class="fgrp"><label>Conducteur</label><select id="edep-cond"><option value="">Aucun</option>${mC.map(c=>`<option value="${c.id}"${c.id===d.cond_id?' selected':''}>${c.prenom} ${c.nom}</option>`).join('')}</select></div>
-      <div class="fgrp fg1"><label>Note</label><textarea id="edep-note" rows="2">${d.note||''}</textarea></div>
-    </div>
-  </div>
+  <div class="mb"><div class="fg">
+    <div class="fgrp"><label>Catégorie</label><select id="edep-cat">${CATS_DEP.map(c=>`<option value="${c}"${c===d.categorie?' selected':''}>${c}</option>`).join('')}</select></div>
+    <div class="fgrp"><label>Montant (FCFA)</label><input type="number" id="edep-montant" value="${d.montant}"/></div>
+    <div class="fgrp"><label>Date</label><input type="date" id="edep-date" value="${d.date}"/></div>
+    <div class="fgrp"><label>Véhicule</label><select id="edep-veh"><option value="">Aucun</option>${mV.map(v=>`<option value="${v.id}"${v.id===d.veh_id?' selected':''}>${v.immat}</option>`).join('')}</select></div>
+    <div class="fgrp fg1"><label>Note</label><textarea id="edep-note" rows="2">${d.note||''}</textarea></div>
+  </div></div>
   <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="updateDep('${did}')">Enregistrer</button></div>`);
 }
+async function updateDep(did){const upd={categorie:gv('edep-cat'),montant:parseFloat(gvr('edep-montant')),date:gvr('edep-date'),veh_id:gv('edep-veh')||null,note:gv('edep-note')};await dbUpd('depenses',did,upd);await addLog('Modif dépense',upd.categorie);closeModal();renderDeps();}
+async function delDep(did){if(CU.role!=='superadmin'){alert('Réservé au Super Admin');return;}if(!confirm('Supprimer cette dépense ?'))return;await dbDel('depenses',did);await addLog('Suppression dépense','—');renderDeps();}
 
-function updateDep(did){
-  const deps=DB.g('depenses')||[];const d=deps.find(x=>x.id===did);if(!d)return;
-  d.categorie=gv('edep-cat');d.montant=parseFloat(gvr('edep-montant'));d.date=gvr('edep-date');
-  d.veh_id=gv('edep-veh')||null;d.cond_id=gv('edep-cond')||null;d.note=gv('edep-note');
-  DB.s('depenses',deps);log('Modif dépense',d.categorie);closeModal();renderDeps();
-}
-
-function delDep(did){
-  if(CU.role!=='superadmin'){alert('Réservé au Super Admin');return;}
-  if(!confirm('Supprimer cette dépense ?'))return;
-  const deps=DB.g('depenses')||[];const i=deps.findIndex(d=>d.id===did);if(i<0)return;
-  deps.splice(i,1);DB.s('depenses',deps);log('Suppression dépense','—');renderDeps();
-}
-
-// ============================================================
+// =============================================
 // RAPPORTS
-// ============================================================
-function renderRapports(){
-  let html=`<div class="pg-hdr"><div><div class="pg-title">Rapports & Exports</div><div class="pg-sub">Générez et exportez vos données</div></div></div>
-  <div class="tabs">
-    <button class="tab on" onclick="showRapportTab('versements',this)">💰 Versements</button>
-    <button class="tab" onclick="showRapportTab('depenses',this)">💸 Dépenses</button>
-  </div>
-  <div class="tw" id="rap-filters">
-    <div class="tw-hdr"><div class="tw-title">🔎 Filtres</div></div>
-    <div style="padding:16px">
-      <div class="fg">
-        <div class="fgrp"><label>Date début</label><input type="date" id="r-dd"/></div>
-        <div class="fgrp"><label>Date fin</label><input type="date" id="r-df" value="${new Date().toISOString().split('T')[0]}"/></div>
-        ${CU.role==='superadmin'?`<div class="fgrp"><label>Propriétaire</label><select id="r-prop"><option value="">Tous</option>${propsSelect()}</select></div>`:''}
-        <div class="fgrp" id="r-stat-wrap"><label>Statut</label><select id="r-stat"><option value="">Tous</option><option value="valide">Validé</option><option value="attente">Attente</option><option value="litige">Litige</option></select></div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-        <button class="btn btn-p" onclick="genRap()">📊 Générer</button>
-        <button class="btn btn-s" onclick="expCSV()">📄 Export CSV</button>
-        <button class="btn btn-s" onclick="expPDF()">📑 Export PDF</button>
-      </div>
-    </div>
-  </div>
-  <div id="rap-result"></div>`;
-  $('content').innerHTML=html;
-}
-
+// =============================================
 let curRapTab='versements';
-function showRapportTab(tab,btn){
-  curRapTab=tab;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-  btn.classList.add('on');
-  const sw=$('r-stat-wrap');
-  if(sw) sw.style.display=tab==='versements'?'block':'none';
-  $('rap-result').innerHTML='';
+function renderRapports(){
+  $('content').innerHTML=`<div class="pg-hdr"><div><div class="pg-title">Rapports & Exports</div><div class="pg-sub">Générez et exportez vos données</div></div></div>
+  <div class="tabs"><button class="tab on" onclick="showRapTab('versements',this)">💰 Versements</button><button class="tab" onclick="showRapTab('depenses',this)">💸 Dépenses</button></div>
+  <div class="tw"><div class="tw-hdr"><div class="tw-title">🔎 Filtres</div></div><div style="padding:16px">
+  <div class="fg">
+    <div class="fgrp"><label>Date début</label><input type="date" id="r-dd"/></div>
+    <div class="fgrp"><label>Date fin</label><input type="date" id="r-df" value="${new Date().toISOString().split('T')[0]}"/></div>
+    ${CU.role==='superadmin'?`<div class="fgrp"><label>Propriétaire</label><select id="r-prop"><option value="">Tous</option>${propsSelect()}</select></div>`:''}
+    <div class="fgrp" id="r-stat-wrap"><label>Statut</label><select id="r-stat"><option value="">Tous</option><option value="valide">Validé</option><option value="attente">Attente</option><option value="litige">Litige</option></select></div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+    <button class="btn btn-p" onclick="genRap()">📊 Générer</button>
+    <button class="btn btn-s" onclick="expCSV()">📄 Export CSV</button>
+  </div></div></div>
+  <div id="rap-result"></div>`;
 }
-
-function getRapData(){
-  const dd=$('r-dd')?.value;const df=$('r-df')?.value;
-  const prop=gv('r-prop');const stat=gv('r-stat');
-  let data=curRapTab==='versements'?myVers():myDeps();
-  if(dd) data=data.filter(d=>new Date(d.date)>=new Date(dd));
-  if(df) data=data.filter(d=>new Date(d.date)<=new Date(df+'T23:59:59'));
-  if(prop) data=data.filter(d=>d.prop_id===prop);
-  if(stat&&curRapTab==='versements') data=data.filter(d=>d.statut===stat);
-  return data.sort((a,b)=>new Date(b.date)-new Date(a.date));
-}
-
+function showRapTab(tab,btn){curRapTab=tab;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');$('rap-result').innerHTML='';}
+function getRapData(){const dd=$('r-dd')?.value;const df=$('r-df')?.value;const prop=gv('r-prop');const stat=gv('r-stat');let data=curRapTab==='versements'?myVers():myDeps();if(dd)data=data.filter(d=>new Date(d.date)>=new Date(dd));if(df)data=data.filter(d=>new Date(d.date)<=new Date(df+'T23:59:59'));if(prop)data=data.filter(d=>d.prop_id===prop);if(stat&&curRapTab==='versements')data=data.filter(d=>d.statut===stat);return data.sort((a,b)=>new Date(b.date)-new Date(a.date));}
 function genRap(){
   const data=getRapData();
   if(curRapTab==='versements'){
     const tot=data.filter(d=>d.statut==='valide').reduce((s,d)=>s+(d.montant||0),0);
-    const totAll=data.reduce((s,d)=>s+(d.montant||0),0);
-    let html=`<div class="tw"><div class="tw-hdr"><div class="tw-title">📋 Versements (${data.length})</div></div>
-    <div style="padding:14px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-      <div style="text-align:center"><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase">Total brut</div><div style="font-size:18px;font-weight:800">${fm(totAll)}</div></div>
-      <div style="text-align:center"><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase">Total validé</div><div style="font-size:18px;font-weight:800;color:var(--green)">${fm(tot)}</div></div>
-      <div style="text-align:center"><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase">Nombre</div><div style="font-size:18px;font-weight:800">${data.length}</div></div>
-    </div>
+    let html=`<div class="tw"><div class="tw-hdr"><div class="tw-title">📋 Versements (${data.length})</div></div><div style="padding:14px 18px;display:flex;gap:24px"><div><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase">Total validé</div><div style="font-size:18px;font-weight:800;color:var(--green)">${fm(tot)}</div></div><div><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase">Nombre</div><div style="font-size:18px;font-weight:800">${data.length}</div></div></div>
     <table><thead><tr><th>Date</th><th>Véhicule</th><th>Conducteur</th><th>Montant</th><th>Statut</th><th>Note</th></tr></thead><tbody>`;
-    if(!data.length) html+='<tr><td colspan="6"><div class="empty-st" style="padding:24px"><h3>Aucun résultat</h3></div></td></tr>';
-    for(const v of data){const vh=getVeh(v.veh_id);const cd=getCond(v.cond_id);
-      html+=`<tr><td>${fd(v.date)}</td><td>${vh?vh.immat:'—'}</td><td>${cd?cd.prenom+' '+cd.nom:'—'}</td><td style="font-weight:800;color:var(--green)">${fm(v.montant)}</td><td>${statusBadge(v.statut)}</td><td style="font-size:11px">${v.note||'—'}</td></tr>`;}
-    html+='</tbody></table></div>';
-    $('rap-result').innerHTML=html;
+    if(!data.length)html+='<tr><td colspan="6"><div class="empty-st" style="padding:24px"><h3>Aucun résultat</h3></div></td></tr>';
+    for(const v of data){const vh=getVeh(v.veh_id);const cd=getCond(v.cond_id);html+=`<tr><td>${fd(v.date)}</td><td>${vh?vh.immat:'—'}</td><td>${cd?cd.prenom+' '+cd.nom:'—'}</td><td style="font-weight:800;color:var(--green)">${fm(v.montant)}</td><td>${statusBadge(v.statut)}</td><td style="font-size:11px">${v.note||'—'}</td></tr>`;}
+    $('rap-result').innerHTML=html+'</tbody></table></div>';
   }else{
     const tot=data.reduce((s,d)=>s+(d.montant||0),0);
-    let html=`<div class="tw"><div class="tw-hdr"><div class="tw-title">📋 Dépenses (${data.length})</div></div>
-    <div style="padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div style="text-align:center"><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase">Total dépenses</div><div style="font-size:20px;font-weight:800;color:var(--red)">${fm(tot)}</div></div>
-      <div style="text-align:center"><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase">Nombre</div><div style="font-size:20px;font-weight:800">${data.length}</div></div>
-    </div>
+    let html=`<div class="tw"><div class="tw-hdr"><div class="tw-title">📋 Dépenses (${data.length})</div></div><div style="padding:14px 18px"><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase">Total dépenses</div><div style="font-size:20px;font-weight:800;color:var(--red)">${fm(tot)}</div></div>
     <table><thead><tr><th>Date</th><th>Catégorie</th><th>Véhicule</th><th>Montant</th><th>Note</th></tr></thead><tbody>`;
-    if(!data.length) html+='<tr><td colspan="5"><div class="empty-st" style="padding:24px"><h3>Aucun résultat</h3></div></td></tr>';
-    for(const d of data){const vh=getVeh(d.veh_id);
-      html+=`<tr><td>${fd(d.date)}</td><td><span class="b b-or">${d.categorie||'—'}</span></td><td>${vh?vh.immat:'—'}</td><td style="font-weight:800;color:var(--red)">${fm(d.montant)}</td><td style="font-size:11px">${d.note||'—'}</td></tr>`;}
-    html+='</tbody></table></div>';
-    $('rap-result').innerHTML=html;
+    if(!data.length)html+='<tr><td colspan="5"><div class="empty-st" style="padding:24px"><h3>Aucun résultat</h3></div></td></tr>';
+    for(const d of data){const vh=getVeh(d.veh_id);html+=`<tr><td>${fd(d.date)}</td><td><span class="b b-or">${d.categorie||'—'}</span></td><td>${vh?vh.immat:'—'}</td><td style="font-weight:800;color:var(--red)">${fm(d.montant)}</td><td style="font-size:11px">${d.note||'—'}</td></tr>`;}
+    $('rap-result').innerHTML=html+'</tbody></table></div>';
   }
 }
-
 function expCSV(){
-  const data=getRapData();
-  let csv='\uFEFF';
-  if(curRapTab==='versements'){
-    csv+='Date,Vehicule,Conducteur,Montant,Statut,Note\n';
-    for(const v of data){const vh=getVeh(v.veh_id)||{};const cd=getCond(v.cond_id)||{};
-      csv+=`"${fd(v.date)}","${vh.immat||'—'}","${cd.prenom||''} ${cd.nom||''}","${v.montant}","${v.statut}","${(v.note||'').replace(/"/g,"'")}"\n`;}
-  }else{
-    csv+='Date,Categorie,Vehicule,Montant,Note\n';
-    for(const d of data){const vh=getVeh(d.veh_id)||{};
-      csv+=`"${fd(d.date)}","${d.categorie||'—'}","${vh.immat||'—'}","${d.montant}","${(d.note||'').replace(/"/g,"'")}"\n`;}
-  }
+  const data=getRapData();let csv='\uFEFF';
+  if(curRapTab==='versements'){csv+='Date,Vehicule,Conducteur,Montant,Statut,Note\n';for(const v of data){const vh=getVeh(v.veh_id)||{};const cd=getCond(v.cond_id)||{};csv+=`"${fd(v.date)}","${vh.immat||'—'}","${cd.prenom||''} ${cd.nom||''}","${v.montant}","${v.statut}","${(v.note||'').replace(/"/g,"'")}"\n`;}}
+  else{csv+='Date,Categorie,Vehicule,Montant,Note\n';for(const d of data){const vh=getVeh(d.veh_id)||{};csv+=`"${fd(d.date)}","${d.categorie||'—'}","${vh.immat||'—'}","${d.montant}","${(d.note||'').replace(/"/g,"'")}"\n`;}}
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download=`samaflotte_${curRapTab}_${new Date().toISOString().split('T')[0]}.csv`;a.click();
-  log('Export CSV',curRapTab);
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`samaflotte_${curRapTab}_${new Date().toISOString().split('T')[0]}.csv`;a.click();
 }
 
-function expPDF(){
-  const data=getRapData();
-  let txt=`SAMA FLOTTE 2.0 — Rapport ${curRapTab}\nGénéré le: ${new Date().toLocaleString('fr-FR')}\n`;
-  txt+=`Nombre d'enregistrements: ${data.length}\n\n`;
-  if(curRapTab==='versements'){
-    const tot=data.filter(d=>d.statut==='valide').reduce((s,d)=>s+(d.montant||0),0);
-    txt+=`TOTAL VALIDÉ: ${fm(tot)}\n\n`;
-    txt+='DATE | VEHICULE | CONDUCTEUR | MONTANT | STATUT\n';
-    txt+='---------------------------------------------------\n';
-    for(const v of data){const vh=getVeh(v.veh_id)||{};const cd=getCond(v.cond_id)||{};
-      txt+=`${fd(v.date)} | ${vh.immat||'—'} | ${cd.prenom||''} ${cd.nom||''} | ${fm(v.montant)} | ${v.statut}\n`;}
-  }else{
-    const tot=data.reduce((s,d)=>s+(d.montant||0),0);
-    txt+=`TOTAL DÉPENSES: ${fm(tot)}\n\n`;
-    txt+='DATE | CATEGORIE | VEHICULE | MONTANT\n';txt+='------------------------------------------\n';
-    for(const d of data){const vh=getVeh(d.veh_id)||{};
-      txt+=`${fd(d.date)} | ${d.categorie||'—'} | ${vh.immat||'—'} | ${fm(d.montant)}\n`;}
-  }
-  const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download=`samaflotte_${curRapTab}_${new Date().toISOString().split('T')[0]}.txt`;a.click();
-  log('Export rapport',curRapTab);
-}
-
-// ============================================================
+// =============================================
 // UTILISATEURS
-// ============================================================
+// =============================================
 function renderUsers(){
-  const users=(DB.g('users')||[]).filter(u=>u.role!=='superadmin');
-  let html=`<div class="pg-hdr"><div><div class="pg-title">Gestion des accès</div><div class="pg-sub">${users.length} utilisateur(s)</div></div></div>
-  <div class="tw">
-    <table><thead><tr><th>Utilisateur</th><th>Rôle</th><th>Email</th><th>Statut</th><th>Créé le</th><th>Actions</th></tr></thead><tbody>`;
-  if(!users.length) html+='<tr><td colspan="6"><div class="empty-st" style="padding:40px"><div class="ei">👥</div><h3>Aucun utilisateur</h3></div></td></tr>';
+  const users=C.users.filter(u=>u.role!=='superadmin');
   const rclr={proprietaire:'b-bl',employe:'b-gr'};const rlbl={proprietaire:'Propriétaire',employe:'Employé'};
-  for(const u of users){
-    html+=`<tr>
-      <td><div style="display:flex;align-items:center;gap:8px">${av(u.nom,u.prenom,avc(u.email||u.id),'sm',u.logo)}<div style="font-weight:700">${u.prenom||''} ${u.nom||''}</div></div></td>
-      <td><span class="b ${rclr[u.role]||'b-gy'}">${rlbl[u.role]||u.role}</span></td>
-      <td style="font-size:11px;color:var(--accent)">${u.email}</td>
-      <td>${u.actif!==false?'<span class="b b-gr">Actif</span>':'<span class="b b-rd">Suspendu</span>'}</td>
-      <td style="font-size:11px">${fd(u.created)}</td>
-      <td><div style="display:flex;gap:4px;flex-wrap:wrap">
-        ${u.role==='employe'?`<button class="btn btn-s btn-xs" onclick="editPerms('${u.id}')">🔐 Perms</button>`:''}
-        <button class="btn btn-s btn-xs" onclick="resetPwd('${u.id}')">🔑</button>
-        <button class="btn btn-${u.actif!==false?'d':'ok'} btn-xs" onclick="toggleUser('${u.id}')">${u.actif!==false?'Suspendre':'Activer'}</button>
-        <button class="btn btn-d btn-xs" onclick="delUser('${u.id}')">🗑️</button>
-      </div></td>
-    </tr>`;
-  }
-  html+='</tbody></table></div>';
-  $('content').innerHTML=html;
+  let html=`<div class="pg-hdr"><div><div class="pg-title">Gestion des accès</div><div class="pg-sub">${users.length} utilisateur(s)</div></div></div>
+  <div class="tw"><table><thead><tr><th>Utilisateur</th><th>Rôle</th><th>Email</th><th>Statut</th><th>Actions</th></tr></thead><tbody>`;
+  if(!users.length)html+='<tr><td colspan="5"><div class="empty-st" style="padding:40px"><div class="ei">👥</div><h3>Aucun utilisateur</h3></div></td></tr>';
+  for(const u of users){html+=`<tr><td><div style="display:flex;align-items:center;gap:8px">${avEl(u.nom,u.prenom,avc(u.email||''),'sm',u.logo)}<div style="font-weight:700">${u.prenom||''} ${u.nom||''}</div></div></td><td><span class="b ${rclr[u.role]||'b-gy'}">${rlbl[u.role]||u.role}</span></td><td style="font-size:11px;color:var(--accent)">${u.email}</td><td>${u.actif!==false?'<span class="b b-gr">Actif</span>':'<span class="b b-rd">Suspendu</span>'}</td>
+  <td><div style="display:flex;gap:4px"><button class="btn btn-${u.actif!==false?'d':'ok'} btn-xs" onclick="toggleUser('${u.id}')">${u.actif!==false?'Suspendre':'Activer'}</button><button class="btn btn-d btn-xs" onclick="delUser('${u.id}')">🗑️</button></div></td></tr>`;}
+  $('content').innerHTML=html+'</tbody></table></div>';
 }
-
 window.openAddUser=function(){
   openModal(`<div class="mh"><div class="mh-title">👤 Nouvel utilisateur</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb">
-    <div class="fg">
-      <div class="fgrp"><label>Prénom *</label><input id="nu-prenom" placeholder="Prénom"/></div>
-      <div class="fgrp"><label>Nom *</label><input id="nu-nom" placeholder="Nom"/></div>
-      <div class="fgrp"><label>Email *</label><input type="email" id="nu-email" placeholder="email@ex.com"/></div>
-      <div class="fgrp"><label>Rôle *</label><select id="nu-role" onchange="onRoleChange()"><option value="employe">Employé / Agent</option><option value="proprietaire">Propriétaire</option></select></div>
-      <div class="fgrp fg1" id="nu-prop-wrap"><label>Propriétaire associé *</label><select id="nu-prop"><option value="">Choisir...</option>${propsSelect()}</select></div>
-      <div class="fgrp"><label>Mot de passe *</label><input type="password" id="nu-pwd" placeholder="Min 8 car."/></div>
-      <div class="fgrp"><label>Confirmer *</label><input type="password" id="nu-pwd2" placeholder="Répéter"/></div>
-    </div>
-    <div id="nu-perms" style="margin-top:10px">
-      <label style="display:block;margin-bottom:8px">Permissions employé</label>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px">
-          <input type="checkbox" id="pv" checked> 💰 Versements — saisie et consultation</label>
-        <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px">
-          <input type="checkbox" id="pveh" checked> 🚗 Véhicules — ajout, modification, consultation</label>
-        <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px">
-          <input type="checkbox" id="pc" checked> 👤 Conducteurs — ajout, modification, consultation</label>
-        <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px">
-          <input type="checkbox" id="pd" checked> 💸 Dépenses — saisie et consultation</label>
-      </div>
-    </div>
-    <div id="nu-err" class="err-msg"></div>
-  </div>
+  <div class="mb"><div class="fg">
+    <div class="fgrp"><label>Prénom *</label><input id="nu-prenom" placeholder="Prénom"/></div>
+    <div class="fgrp"><label>Nom *</label><input id="nu-nom" placeholder="Nom"/></div>
+    <div class="fgrp"><label>Email *</label><input type="email" id="nu-email" placeholder="email@ex.com"/></div>
+    <div class="fgrp"><label>Rôle *</label><select id="nu-role"><option value="employe">Employé / Agent</option><option value="proprietaire">Propriétaire</option></select></div>
+    <div class="fgrp"><label>Mot de passe *</label><input type="password" id="nu-pwd" placeholder="Min 8 car."/></div>
+    <div class="fgrp"><label>Confirmer *</label><input type="password" id="nu-pwd2" placeholder="Répéter"/></div>
+  </div><div id="nu-err" class="err-msg"></div></div>
   <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="saveUser()">Créer</button></div>`);
-}
-
-function onRoleChange(){
-  const r=gv('nu-role');
-  const pw=$('nu-prop-wrap');const np=$('nu-perms');
-  if(pw) pw.style.display=r==='proprietaire'?'none':'block';
-  if(np) np.style.display=r==='employe'?'block':'none';
-}
-
-function saveUser(){
+};
+async function saveUser(){
   const prenom=gv('nu-prenom'),nom=gv('nu-nom'),email=gv('nu-email'),role=gv('nu-role'),pwd=gvr('nu-pwd'),pwd2=gvr('nu-pwd2');
   const err=$('nu-err');err.style.display='none';
   if(!prenom||!nom||!email||!pwd){err.textContent='Champs obligatoires manquants';err.style.display='block';return;}
   if(pwd!==pwd2){err.textContent='Mots de passe différents';err.style.display='block';return;}
-  if(pwd.length<8){err.textContent='Mot de passe trop court (min 8)';err.style.display='block';return;}
-  const users=DB.g('users')||[];
-  if(users.find(u=>u.email.toLowerCase()===email.toLowerCase())){err.textContent='Email déjà utilisé';err.style.display='block';return;}
+  if(pwd.length<8){err.textContent='Mot de passe trop court';err.style.display='block';return;}
+  const{data:sd,error:se}=await sb.auth.signUp({email,password:pwd});
+  if(se){err.textContent='Erreur: '+se.message;err.style.display='block';return;}
   const nid=uid();
-  users.push({id:nid,nom,prenom,email,pwd:hpwd(pwd),role,actif:true,created:now()});
-  DB.s('users',users);
-  if(role==='employe'){
-    const pid=gv('nu-prop');
-    const emps=DB.g('employes')||[];
-    emps.push({id:uid(),utilisateur_id:nid,prop_id:pid,permissions:{
-      versements:$('pv')?.checked!==false,vehicules:$('pveh')?.checked!==false,
-      conducteurs:$('pc')?.checked!==false,depenses:$('pd')?.checked!==false}});
-    DB.s('employes',emps);
-  }else if(role==='proprietaire'){
-    const props=DB.g('proprietaires')||[];
-    props.push({id:uid(),uid:nid,tel:'',adresse:'',created:now()});
-    DB.s('proprietaires',props);
-  }
-  log('Création utilisateur',prenom+' '+nom+' ('+role+')');closeModal();renderUsers();
+  await dbIns('users',{id:nid,auth_id:sd.user?.id||null,nom,prenom,email,role,actif:true,created_at:now()});
+  if(role==='proprietaire')await dbIns('proprietaires',{id:uid(),uid:nid,tel:'',adresse:'',created_at:now()});
+  await addLog('Création utilisateur',prenom+' '+nom+' ('+role+')');closeModal();renderUsers();
 }
+async function toggleUser(uid_){const u=C.users.find(x=>x.id===uid_);if(!u)return;await dbUpd('users',uid_,{actif:!u.actif});await addLog((u.actif?'Suspension':'Activation')+' compte',u.prenom+' '+u.nom);renderUsers();}
+async function delUser(uid_){if(!confirm('Supprimer définitivement cet utilisateur ?'))return;const u=C.users.find(x=>x.id===uid_);await dbDel('users',uid_);if(u?.role==='proprietaire')C.proprietaires=C.proprietaires.filter(p=>p.uid!==uid_);await addLog('Suppression utilisateur',u?.prenom+' '+u?.nom);renderUsers();}
 
-function editPerms(uid_){
-  const emps=DB.g('employes')||[];let emp=emps.find(e=>e.utilisateur_id===uid_);
-  if(!emp){emp={utilisateur_id:uid_,prop_id:'',permissions:{}};emps.push(emp);}
-  const p=emp.permissions||{};
-  openModal(`<div class="mh"><div class="mh-title">🔐 Permissions employé</div><div class="x-btn" onclick="closeModal()">✕</div></div>
-  <div class="mb">
-    <div class="fgrp"><label>Propriétaire associé</label><select id="ep-prop">${propsSelect(emp.prop_id)}</select></div>
-    <div style="margin-top:12px"><label style="display:block;margin-bottom:10px">Accès autorisés</label>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <label style="display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px">
-          <input type="checkbox" id="pp-v" ${p.versements!==false?'checked':''}> 💰 Versements</label>
-        <label style="display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px">
-          <input type="checkbox" id="pp-veh" ${p.vehicules!==false?'checked':''}> 🚗 Véhicules</label>
-        <label style="display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px">
-          <input type="checkbox" id="pp-c" ${p.conducteurs!==false?'checked':''}> 👤 Conducteurs</label>
-        <label style="display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px">
-          <input type="checkbox" id="pp-d" ${p.depenses!==false?'checked':''}> 💸 Dépenses</label>
-      </div>
-    </div>
-  </div>
-  <div class="mf"><button class="btn btn-s" onclick="closeModal()">Annuler</button><button class="btn btn-p" onclick="savePerms('${uid_}')">Enregistrer</button></div>`);
-}
-
-function savePerms(uid_){
-  const emps=DB.g('employes')||[];let emp=emps.find(e=>e.utilisateur_id===uid_);
-  if(!emp){emp={id:uid(),utilisateur_id:uid_};emps.push(emp);}
-  emp.prop_id=gv('ep-prop');
-  emp.permissions={versements:$('pp-v')?.checked!==false,vehicules:$('pp-veh')?.checked!==false,conducteurs:$('pp-c')?.checked!==false,depenses:$('pp-d')?.checked!==false};
-  DB.s('employes',emps);log('Modif permissions','Employé');closeModal();renderUsers();
-}
-
-function resetPwd(uid_){
-  const newPwd=prompt('Nouveau mot de passe (min 8 caractères) :');
-  if(!newPwd) return;
-  if(newPwd.length<8){alert('Trop court (min 8 caractères)');return;}
-  const users=DB.g('users')||[];const u=users.find(x=>x.id===uid_);if(!u)return;
-  u.pwd=hpwd(newPwd);DB.s('users',users);log('Réinit MDP',u.prenom+' '+u.nom);alert('Mot de passe réinitialisé ✓');
-}
-
-function toggleUser(uid_){
-  const users=DB.g('users')||[];const u=users.find(x=>x.id===uid_);if(!u)return;
-  u.actif=!u.actif;DB.s('users',users);log((u.actif?'Activation':'Suspension')+' compte',u.prenom+' '+u.nom);renderUsers();
-}
-
-function delUser(uid_){
-  if(!confirm('Supprimer définitivement cet utilisateur ?'))return;
-  const users=DB.g('users')||[];const i=users.findIndex(u=>u.id===uid_);if(i<0)return;
-  const name=users[i].prenom+' '+users[i].nom;const role=users[i].role;
-  users.splice(i,1);DB.s('users',users);
-  if(role==='proprietaire'){const props=DB.g('proprietaires')||[];DB.s('proprietaires',props.filter(p=>p.uid!==uid_));}
-  if(role==='employe'){const emps=DB.g('employes')||[];DB.s('employes',emps.filter(e=>e.utilisateur_id!==uid_));}
-  log('Suppression utilisateur',name);renderUsers();
-}
-
-// ============================================================
-// JOURNAL ACTIVITÉ
-// ============================================================
+// =============================================
+// JOURNAL
+// =============================================
 function renderActivity(){
-  const acts=DB.g('activity')||[];
+  const acts=C.activity;
   let html=`<div class="pg-hdr"><div><div class="pg-title">Journal d'activité</div><div class="pg-sub">${acts.length} action(s)</div></div></div>
-  <div class="tw"><table><thead><tr><th>Date/Heure</th><th>Utilisateur</th><th>Action</th><th>Détail</th></tr></thead><tbody>`;
-  if(!acts.length) html+='<tr><td colspan="4"><div class="empty-st" style="padding:40px"><h3>Aucune activité</h3></div></td></tr>';
-  for(const a of acts){
-    const u=getUser(a.uid)||{nom:'—',prenom:''};
-    html+=`<tr>
-      <td style="font-family:var(--mono);font-size:10px;white-space:nowrap">${fdt(a.ts)}</td>
-      <td><div style="display:flex;align-items:center;gap:6px">${av(u.nom,u.prenom,avc(u.email||u.id),'sm')}<span style="font-size:12px">${u.prenom} ${u.nom}</span></div></td>
-      <td><span class="b b-bl" style="font-size:10px">${a.action}</span></td>
-      <td style="font-size:11px;color:var(--text3)">${a.detail||'—'}</td>
-    </tr>`;
-  }
-  html+='</tbody></table></div>';
-  $('content').innerHTML=html;
+  <div class="tw"><table><thead><tr><th>Date/Heure</th><th>Action</th><th>Détail</th></tr></thead><tbody>`;
+  if(!acts.length)html+='<tr><td colspan="3"><div class="empty-st" style="padding:40px"><h3>Aucune activité</h3></div></td></tr>';
+  for(const a of acts){html+=`<tr><td style="font-family:var(--mono);font-size:10px;white-space:nowrap">${fdt(a.ts)}</td><td><span class="b b-bl" style="font-size:10px">${a.action}</span></td><td style="font-size:11px;color:var(--text3)">${a.detail||'—'}</td></tr>`;}
+  $('content').innerHTML=html+'</tbody></table></div>';
 }
 
-// ============================================================
+// =============================================
 // PROFIL
-// ============================================================
+// =============================================
 function renderProfil(){
   const u=CU;
-  let html=`<div class="pg-hdr"><div><div class="pg-title">Mon profil</div><div class="pg-sub">Gérez votre compte</div></div></div>
+  $('content').innerHTML=`<div class="pg-hdr"><div><div class="pg-title">Mon profil</div><div class="pg-sub">Gérez votre compte</div></div></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-    <div class="tw">
-      <div class="tw-hdr"><div class="tw-title">ℹ️ Informations</div></div>
-      <div style="padding:16px">
-        <div style="text-align:center;margin-bottom:16px">
-          <div id="prof-av-prev" style="width:80px;height:80px;border-radius:50%;background:${avc(u.email)};display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 10px;overflow:hidden">
-            ${u.logo?`<img src="${u.logo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:ini(u.nom,u.prenom)}
-          </div>
-          <label class="btn btn-s btn-sm" style="cursor:pointer">📷 Changer photo <input type="file" accept="image/*" style="display:none" onchange="updateProfilePhoto(this)"></label>
-        </div>
-        <div class="fgrp"><label>Prénom</label><input id="prof-prenom" value="${u.prenom||''}"/></div>
-        <div class="fgrp"><label>Nom</label><input id="prof-nom" value="${u.nom||''}"/></div>
-        <div class="fgrp"><label>Email</label><input type="email" id="prof-email" value="${u.email||''}"/></div>
-        <div class="fgrp"><label>Téléphone</label><input id="prof-tel" value="${u.tel||''}"/></div>
-        <button class="btn btn-p" onclick="saveProfil()">💾 Enregistrer</button>
-        <div id="prof-ok" class="ok-msg">✅ Profil mis à jour</div>
-      </div>
-    </div>
-    <div class="tw">
-      <div class="tw-hdr"><div class="tw-title">🔑 Changer le mot de passe</div></div>
-      <div style="padding:16px">
-        <div class="fgrp"><label>Mot de passe actuel</label><input type="password" id="pwd-cur" placeholder="••••••••"/></div>
-        <div class="fgrp"><label>Nouveau mot de passe</label><input type="password" id="pwd-new" placeholder="Min 8 car."/></div>
-        <div class="fgrp"><label>Confirmer</label><input type="password" id="pwd-new2" placeholder="Répéter"/></div>
-        <div id="pwd-err" class="err-msg"></div>
-        <div id="pwd-ok" class="ok-msg">✅ Mot de passe modifié</div>
-        <button class="btn btn-p" onclick="savePwd()">🔑 Changer</button>
-      </div>
-    </div>
-  </div>
-  <div class="tw" style="margin-top:14px">
-    <div class="tw-hdr"><div class="tw-title">📊 Informations du compte</div></div>
-    <div style="padding:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center">
-      <div><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase">Rôle</div><div style="font-size:14px;font-weight:800;margin-top:4px">${{superadmin:'Super Admin',proprietaire:'Propriétaire',employe:'Employé'}[u.role]||u.role}</div></div>
-      <div><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase">Créé le</div><div style="font-size:14px;font-weight:700;margin-top:4px">${fd(u.created)}</div></div>
-      <div><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase">Statut</div><div style="margin-top:6px"><span class="b b-gr">Actif</span></div></div>
-    </div>
+    <div class="tw"><div class="tw-hdr"><div class="tw-title">ℹ️ Informations</div></div>
+    <div style="padding:16px">
+      <div style="text-align:center;margin-bottom:16px"><div style="width:80px;height:80px;border-radius:50%;background:${avc(u.email)};display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 10px">${ini(u.nom,u.prenom)}</div></div>
+      <div class="fgrp"><label>Prénom</label><input id="prof-prenom" value="${u.prenom||''}"/></div>
+      <div class="fgrp"><label>Nom</label><input id="prof-nom" value="${u.nom||''}"/></div>
+      <div class="fgrp"><label>Email</label><input type="email" id="prof-email" value="${u.email||''}"/></div>
+      <div class="fgrp"><label>Téléphone</label><input id="prof-tel" value="${u.tel||''}"/></div>
+      <button class="btn btn-p" onclick="saveProfil()">💾 Enregistrer</button>
+      <div id="prof-ok" class="ok-msg">✅ Profil mis à jour</div>
+    </div></div>
+    <div class="tw"><div class="tw-hdr"><div class="tw-title">📊 Compte</div></div>
+    <div style="padding:16px">
+      <div class="dr"><span class="dl">Rôle</span><span class="dv">${{superadmin:'Super Admin',proprietaire:'Propriétaire',employe:'Employé'}[u.role]||u.role}</span></div>
+      <div class="dr"><span class="dl">Email</span><span class="dv">${u.email}</span></div>
+      <div class="dr"><span class="dl">Statut</span><span class="dv"><span class="b b-gr">Actif</span></span></div>
+      <div class="dr"><span class="dl">Connexion via</span><span class="dv">Supabase Auth ✅</span></div>
+    </div></div>
   </div>`;
-  $('content').innerHTML=html;
 }
-
-async function updateProfilePhoto(input){
-  if(!input.files[0])return;
-  if(input.files[0].size>3*1024*1024){alert('Image trop lourde (max 3Mo)');return;}
-  const data=await readFileAsDataURL(input.files[0]);
-  const prev=$('prof-av-prev');
-  prev.innerHTML=`<img src="${data}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-  const users=DB.g('users')||[];const u=users.find(x=>x.id===CU.id);if(!u)return;
-  u.logo=data;DB.s('users',users);CU=u;refreshUser();
-}
-
-function saveProfil(){
-  const users=DB.g('users')||[];const u=users.find(x=>x.id===CU.id);if(!u)return;
-  u.prenom=gv('prof-prenom');u.nom=gv('prof-nom');u.email=gv('prof-email');u.tel=gv('prof-tel');
-  DB.s('users',users);CU=u;refreshUser();log('Modif profil',u.prenom+' '+u.nom);
+async function saveProfil(){
+  const upd={prenom:gv('prof-prenom'),nom:gv('prof-nom'),email:gv('prof-email'),tel:gv('prof-tel')};
+  await dbUpd('users',CU.id,upd);CU={...CU,...upd};refreshUser();
   const ok=$('prof-ok');ok.style.display='flex';setTimeout(()=>ok.style.display='none',3000);
 }
 
-function savePwd(){
-  const cur=gvr('pwd-cur'),nw=gvr('pwd-new'),nw2=gvr('pwd-new2');
-  const err=$('pwd-err');err.style.display='none';
-  if(!cpwd(cur,CU.pwd)){err.textContent='Mot de passe actuel incorrect';err.style.display='block';return;}
-  if(nw!==nw2){err.textContent='Les nouveaux mots de passe ne correspondent pas';err.style.display='block';return;}
-  if(nw.length<8){err.textContent='Trop court (min 8 caractères)';err.style.display='block';return;}
-  const users=DB.g('users')||[];const u=users.find(x=>x.id===CU.id);
-  u.pwd=hpwd(nw);DB.s('users',users);CU=u;log('Changement MDP','—');
-  const ok=$('pwd-ok');ok.style.display='flex';setTimeout(()=>ok.style.display='none',3000);
-  $('pwd-cur').value='';$('pwd-new').value='';$('pwd-new2').value='';
+// =============================================
+// INIT
+// =============================================
+async function init(){
+  const savedTheme=localStorage.getItem('sf2_theme');
+  if(savedTheme==='light'){isDark=false;document.body.classList.add('light');const sw=$('sw-theme');if(sw)sw.classList.remove('on');$('theme-lbl').textContent='☀️ Mode clair';}
+  const{data:{session}}=await sb.auth.getSession();
+  if(session){
+    const{data:uData}=await sb.from('users').select('*').eq('auth_id',session.user.id).single();
+    if(uData&&uData.actif!==false){CU=uData;await loadAll();$('load-ov').style.display='none';startApp();return;}
+  }
+  $('load-ov').style.display='none';$('login-page').style.display='flex';
+  ['ln-email','ln-pwd'].forEach(id=>{const el=$(id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});});
 }
-
-// ============================================================
-// INIT & START
-// ============================================================
-initDB();
-
-// Theme
-const savedTheme=DB.g('theme');
-if(savedTheme==='light'){isDark=false;document.body.classList.add('light');const sw=$('sw-theme');if(sw)sw.classList.remove('on');}
-
-// Keyboard on login
-['ln-email','ln-pwd'].forEach(id=>{
-  const el=$(id);if(el) el.addEventListener('keydown',e=>{if(e.key==='Enter') doLogin();});
-});
-
-// Pre-fill login for first time hint
-if(!DB.g('session')){
-  const em=$('ln-email');const pw=$('ln-pwd');
-  if(em) em.value='ngaryservicepro@ngary.sn';
-  if(pw) pw.value='775097417@Az';
-}
-
-// Check session
-if(chkSession()) startApp();
+init();
 </script>
 </body>
 </html>
